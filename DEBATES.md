@@ -1,64 +1,60 @@
-# 🔥 Open Debates in the Fairness Tooling Community
+# AI Ethics Podcast — Ongoing Fairness Debates on GitHub
 
-Real GitHub issue threads where the fairness community is actively disagreeing. Each entry includes background, the key positions, and why it matters for your work.
+Real disputes from the fairness-tooling community that illuminate the tensions between ethical ideals and real-world deployment. Curated for the **AI Ethics & Social Justice Podcast**.
 
 ---
 
-## Debate: Should Fairness Tools Recognize "Species" as a Sensitive Feature?
+## Debate: Should a Fairness Tool Recognize "Species" as a Sensitive Feature for Bias Evaluation?
 
-**Issue:** [fairlearn/fairlearn#1625](https://github.com/fairlearn/fairlearn/issues/1625)  
-**Status:** Open (Feb 2026 – present, still unresolved)  
-**Participants:** Final-year student (@samtuckerdavis) proposing the addition; two project maintainers (Tamara Atanasoska, Roman Lutz)
+**Source:** [fairlearn/fairlearn#1625](https://github.com/fairlearn/fairlearn/issues/1625) (Opened Feb 2026, still open as of Jul 2026)
 
-### Background
+**Context:** A community contributor proposed adding "species" (animal species) as a recognized sensitive feature in Fairlearn's fairness evaluation framework, citing a growing body of peer-reviewed research documenting speciesist bias in AI systems. What followed was a nuanced disagreement between a community member and two maintainers about what a fairness library *should* cover, who its audiences are, and where to draw the boundary between "bias we resolve to measure" and "bias we treat as someone else's problem."
 
-Fairlearn — Microsoft-backed, 2,284 stars, the most widely adopted Python fairness library — does not define a fixed list of sensitive features. Instead, users supply whatever grouping variable their context demands. A student argues that "species" should be treated as a sensitive feature alongside race, gender, and age, citing a growing peer-reviewed literature documenting measurable speciesist bias in AI:
+### Core Positions
 
-- **Hagendorff et al. (2023)** found GPT-3 associated farmed animals with violence and explicitly called for fairness frameworks to include speciesist bias metrics.
-- **Takeshita et al. (2022)** showed BERT and RoBERTa associate harmful words with nonhuman animals.
-- **Hagendorff et al. (2025)** released SpeciesismBench (1,003 items): LLMs "frequently normalized harm toward farmed animals while refusing to do so for non-farmed animals."
-- **Open Paws** built AHA Benchmark (4,350 items) measuring species-dependent risks of harm in LLM outputs.
+**Pro-Inclusion — @samtuckerdavis (community contributor):**  
+The proposal is grounded in specific, peer-reviewed research:
+- **Hagendorff, Bossert, Tse & Singer (2023).** *"Speciesist bias in AI."* AI and Ethics. Found GPT-3 associates farmed animals with violence; explicitly calls for fairness frameworks to include speciesist bias metrics. [DOI: 10.1007/s43681-023-00380-w](https://doi.org/10.1007/s43681-023-00380-w)
+- **Takeshita et al. (2022).** BERT and RoBERTa associate harmful words with nonhuman animals. *Information Processing & Management.*
+- **Hagendorff et al. (2025).** SpeciesismBench (1,003 items): LLMs "frequently normalized harm toward farmed animals while refusing to do so for non-farmed animals."
+- **AI-for-Animals (2025).** AHA Benchmark (4,350 items): species-dependent risks of harm in LLM outputs.
 
-The proposal asks for three concrete steps: documentation acknowledging speciesist bias, an example notebook demonstrating Fairlearn's existing MetricFrame with species as the sensitive feature, and eventually dedicated metrics.
+The contributor argues that Fairlearn — a Microsoft-backed project with strong academic credibility — acknowledging species-based discrimination would set an important precedent. They also pledged to contribute documentation, example notebooks, or metric implementations themselves.
 
-### The Key Positions
+**Respectful Skepticism — @TamaraAtanasoska (maintainer, computational linguist):**  
+While sympathetic to the cause, the maintainer raised three substantive objections:
+1. **Domain mismatch.** All the cited research concerns NLP and language models, while Fairlearn has no NLP components and is designed for traditional (tabular, classification) ML. The tool's architecture and metric suite are not built for text-based bias signals.
+2. **No fixed sensitive-feature list.** Fairlearn deliberately does not define a canonical list of sensitive attributes in code — any column can become a sensitive feature. The documented list in the User Guide is *non-exhaustive* — just a few illustrative examples ("race, gender, age, etc."). Adding species would imply formalizing it in a way that contradicts this design philosophy.
+3. **Opportunity cost.** Documentation and example notebooks are finite resources. Adding a highly specialized topic may distract from the core fairness dimensions (race, gender, socioeconomic status) that the vast majority of practitioners need.
 
-| Stakeholder | Position | Reasoning |
-|---|---|---|
-| **Proposal author** (@samtuckerdavis) | Species should be recognized | Speciesism is measurable; the research base is growing; Fairlearn's mission is universal — "empower developers to assess and improve fairness" — and excluding one measurable form of unfairness contradicts that mission. | 
-| **Maintainer @TamaraAtanasoska** (computational linguist) | Not in scope for Fairlearn at present | Fairlearn has no NLP components; sensitive features are user-supplied examples, not an exhaustive list; any column can be a sensitive attribute, so the "should we recognize it?" question is less urgent than it looks. |
-| **Maintainer @RomanLutz** (also maintains Microsoft's PyRIT) | Redirect to PyRIT instead | PyRIT (the Python Risk Identification Toolkit) is better positioned for this application. Implies: fairness tools should specialize rather than be everything to everyone. |
+**Cross-Pollination Suggestion — @romanlutz (maintainer, PyRIT team):**  
+"This is very much in scope for [Microsoft's PyRIT](https://github.com/microsoft/PyRIT) library!" — pointing the contributor toward a broader responsible-AI toolkit that covers NLP, generative AI, and multiple bias dimensions including species, rather than directing the effort at Fairlearn specifically.
 
 ### The Unresolved Tension
 
-This issue crystallizes three questions that every fairness-tool builder must confront:
+This debate crystallizes three questions that remain deeply relevant to the entire fairness-tooling ecosystem:
 
-1. **Scope: Who should a fairness tool serve?** If the goal is "all sentient beings," is a purely demographic-parity toolkit sufficient, or does that toolkit implicitly endorse a species boundary? The proposal author argues that *not* flagging speciesist harm is itself a choice with moral weight. The maintainer argues that scope is a feature, not a bug — tools that try to do everything end up doing nothing well.
+1. **Where does one fairness tool's responsibility end and another's begin?** Fairlearn covers traditional ML; PyRIT covers NLP and generative AI. But the boundary isn't always clean — the same biased model might be audited through different lenses depending on who's using which tool. Does splitting responsibilities across projects make fairness *more* manageable, or does it create gaps where no one feels accountable?
 
-2. **Metrics: Can existing fairness metrics even detect species-based harm?** Fairlearn's demographic parity, equalized odds, and counterfactual fairness measures are designed for human demographic groups. Species classification in AI (trained on visual/linguistic features) may require fundamentally different metrics — the literature shows harm manifests as *normalized hostility* in LLM outputs, not merely as selection-rate disparities. New benchmarks (SpeciesismBench, AHA) suggest we need entirely new evaluation paradigms.
+2. **Should fairness tools be "domain-general" or "domain-specific"?** A tool that tries to cover everything risks shallow treatment of each domain. A tool that covers one domain well risks excluding affected communities whose bias doesn't fit that domain. Fairlearn's choice to be domain-general (any column can be sensitive) while also curating illustrative examples creates this exact tension.
 
-3. **Gatekeeping: Who decides what counts as a "fairness" issue?** The maintainer's redirect to PyRIT suggests a practical division of labor within the fairness ecosystem. But it also raises the question: what criteria determine which forms of bias get dedicated tool support, and who is excluded from that decision-making? Communities whose harm doesn't fit existing frameworks may never get representation at all.
+3. **Who gets to define what counts as "fairness"?** The contributor brought citations from animal-welfare researchers arguing speciesist bias is measurable harm. The maintainers responded that *their* community (traditional ML practitioners) has different priorities. This question — who defines the fairness framework, and whose expertise is centered — isn't just about species. It's about race, gender, disability, and every axis along which AI systems can cause harm.
 
-### Why This Debate Won't Resolve Easily
+4. **Is "not now" the same as "never"?** When maintainers say this isn't in scope for Fairlearn but is for PyRIT, they're making a practical decision about project resources. But for the communities affected by speciesist AI harm, "not in scope" can feel like invisibility. How should open-source fairness projects communicate trade-offs without reinforcing the very power asymmetries they aim to address?
 
-- One side says *mission demands coverage*; the other says *scope enables focus*. Both are defensible.
-- The research base is young and contested — the speciesism-in-AI papers are published in specialized venues, not yet mainstream enough to be consensus.
-- The maintainers' identities matter: both Tamara Atanasoska and Roman Lutz are computational linguists. Their instinct to flag the NLP-vs-traditional-ML distinction reflects their expertise, but it may blind them to the moral argument.
+### Why This Matters for Listeners
 
-### Discussion Prompts for Our Listeners
+This isn't an abstract technical disagreement. The answer to "which forms of bias should our tools cover?" determines whether marginalized communities are visible in the fairness infrastructure — or rendered invisible by a tool that only looks the way *its creators* think to look. The Fairlearn community's navigation of this question — listening respectfully, explaining their technical constraints, and redirecting to a more relevant project — is a model for how open-source ethics code *could* work. But it's also a reminder that redirection only works if the redirected project actually acts on it.
 
-1. Should a fairness-auditing tool like Fairlearn covering only human demographics be considered incomplete — or is drawing a boundary around what to measure a practical necessity?
-2. If you were designing a fairness toolkit today, would you include species as a sensitive feature out of the box, or would you make it user-supplied and defer to community contributions?
-3. Does the maintainer's redirect to PyRIT reflect healthy ecosystem specialization, or does it risk creating an accessibility barrier where only projects with institutional backing can cover emerging bias categories?
-4. Who should get to define what counts as a "form of unfairness" — the tool's maintainers, its users, the affected communities, the academic literature, or some combination?
+This is a live debate you can follow: [fairlearn/fairlearn#1625](https://github.com/fairlearn/fairlearn/issues/1625).
 
 ---
 
-## How to Submit a Debate
+## How to Contribute
 
-1. Find an open GitHub issue in an active fairness/bias-auditing tool that surfaces a genuine disagreement
-2. Verify it's still active (comments within the last 30 days, not closed)
-3. Summarize it in the format above: background, positions, unresolved tension, and 3–4 discussion prompts
-4. Open a PR or file an issue in *this* repo with your submission
+Know of another fairness debate unfolding on GitHub? Found a controversial issue thread where the community is wrestling with an ethical question? Open a PR or issue with:
+- The GitHub issue link
+- A summary of the positions taken
+- Why it matters for the podcast
 
-We prioritize debates that center communities most affected by algorithmic harm, not just technologist-to-technician disagreements.
+We prioritize debates that center the perspectives of communities most affected by algorithmic harm, not just technologists and policymakers.
