@@ -1,42 +1,64 @@
-# AI Ethics Podcast — Ongoing Fairness Debates on GitHub
+# 🔥 Open Debates in the Fairness Tooling Community
 
-Real disputes from the fairness-tooling community that illuminate the tensions between技术理想 and real-world deployment. Curated for the **AI Ethics & Social Justice Podcast**.
+Real GitHub issue threads where the fairness community is actively disagreeing. Each entry includes background, the key positions, and why it matters for your work.
 
 ---
 
-## Debate: Should a Fairness Library Ship Demographic Parity *and* Equal Opportunity Classifiers — and Who Should They Serve?
+## Debate: Should Fairness Tools Recognize "Species" as a Sensitive Feature?
 
-**Source:** [fairlearn/fairlearn#466](https://github.com/fairlearn/fairlearn/issues/466) (2020–2021)
+**Issue:** [fairlearn/fairlearn#1625](https://github.com/fairlearn/fairlearn/issues/1625)  
+**Status:** Open (Feb 2026 – present, still unresolved)  
+**Participants:** Final-year student (@samtuckerdavis) proposing the addition; two project maintainers (Tamara Atanasoska, Roman Lutz)
 
-**Context:** A contributor proposed porting `DemographicParityClassifier` and `EqualOpportunityClassifier` from scikit-fairness into Fairlearn, arguing the methods fill a gap in the library's mitigation offerings. What followed was an extended, substantive debate among Fairlearn maintainers about the fundamental architecture of a fairness toolkit — not just "should we add this feature," but "what *is* fairness, who are these tools for, and what harms they risk amplifying."
+### Background
 
-### Core Positions
+Fairlearn — Microsoft-backed, 2,284 stars, the most widely adopted Python fairness library — does not define a fixed list of sensitive features. Instead, users supply whatever grouping variable their context demands. A student argues that "species" should be treated as a sensitive feature alongside race, gender, and age, citing a growing peer-reviewed literature documenting measurable speciesist bias in AI:
 
-**Pro-addition (MBrouns, original proposer):**
-The algorithms from scikit-fairness are backed by published research (Zafar et al., 2017) and implement a well-defined optimization approach — constrained logistic regression that enforces a specific fairness notion. They fill a gap not currently addressed by Fairlearn's reductions or post-processing approaches, especially for practitioners who want a simple, interpretable in-processing method.
+- **Hagendorff et al. (2023)** found GPT-3 associated farmed animals with violence and explicitly called for fairness frameworks to include speciesist bias metrics.
+- **Takeshita et al. (2022)** showed BERT and RoBERTa associate harmful words with nonhuman animals.
+- **Hagendorff et al. (2025)** released SpeciesismBench (1,003 items): LLMs "frequently normalized harm toward farmed animals while refusing to do so for non-farmed animals."
+- **Open Paws** built AHA Benchmark (4,350 items) measuring species-dependent risks of harm in LLM outputs.
 
-**Skeptical (MiroDudik, maintainer):**
-While the underlying math is sound, the *naming and framing* of these classifiers — `DemographicParityClassifier` and `EqualOpportunityClassifier` — risk conflating predictive modeling with policy-making. Group fairness constraints are not free lunches: enforcing demographic parity can increase error rates for disadvantaged groups even as it reduces statistical disparity. Fairlearn's own philosophy emphasizes that users must understand the *trade-offs* and make informed choices, not be handed a "fair classification" button.
+The proposal asks for three concrete steps: documentation acknowledging speciesist bias, an example notebook demonstrating Fairlearn's existing MetricFrame with species as the sensitive feature, and eventually dedicated metrics.
 
-**Context-critical (kevinrobinson, community contributor):**
-Argued that the examples used in the scikit-fairness documentation — particularly the "Arrests" dataset often used to demonstrate demographic parity — are ethically fraught. Predictive policing has been extensively documented as producing feedback loops that *entrench* racial bias rather than mitigate it. Deploying a "fair" classifier on policing data without addressing the underlying data collection and policy context may cause more harm than good. This is not a technical problem that a metric can solve.
+### The Key Positions
+
+| Stakeholder | Position | Reasoning |
+|---|---|---|
+| **Proposal author** (@samtuckerdavis) | Species should be recognized | Speciesism is measurable; the research base is growing; Fairlearn's mission is universal — "empower developers to assess and improve fairness" — and excluding one measurable form of unfairness contradicts that mission. | 
+| **Maintainer @TamaraAtanasoska** (computational linguist) | Not in scope for Fairlearn at present | Fairlearn has no NLP components; sensitive features are user-supplied examples, not an exhaustive list; any column can be a sensitive attribute, so the "should we recognize it?" question is less urgent than it looks. |
+| **Maintainer @RomanLutz** (also maintains Microsoft's PyRIT) | Redirect to PyRIT instead | PyRIT (the Python Risk Identification Toolkit) is better positioned for this application. Implies: fairness tools should specialize rather than be everything to everyone. |
 
 ### The Unresolved Tension
 
-The debate crystallizes around three questions that remain relevant today:
+This issue crystallizes three questions that every fairness-tool builder must confront:
 
-1. **Which fairness metric should the tool default to?** Demographic parity (statistical parity) is intuitively appealing but often in tension with equalized odds or predictive parity. Fairlearn's library eventually chose to expose *multiple* constraints and let users choose — but that choice itself is a design decision that shapes who the tool serves.
+1. **Scope: Who should a fairness tool serve?** If the goal is "all sentient beings," is a purely demographic-parity toolkit sufficient, or does that toolkit implicitly endorse a species boundary? The proposal author argues that *not* flagging speciesist harm is itself a choice with moral weight. The maintainer argues that scope is a feature, not a bug — tools that try to do everything end up doing nothing well.
 
-2. **Who should a fairness tool serve?** Practitioners seeking quick compliance checks? Communities who need to verify that a predictive system isn't discriminating against them? Policy-makers trying to demonstrate regulation compliance? These audiences have fundamentally different needs, and a tool that optimizes for one may fall short for the others.
+2. **Metrics: Can existing fairness metrics even detect species-based harm?** Fairlearn's demographic parity, equalized odds, and counterfactual fairness measures are designed for human demographic groups. Species classification in AI (trained on visual/linguistic features) may require fundamentally different metrics — the literature shows harm manifests as *normalized hostility* in LLM outputs, not merely as selection-rate disparities. New benchmarks (SpeciesismBench, AHA) suggest we need entirely new evaluation paradigms.
 
-3. **Can fairness tools be domain-agnostic?** The policing example reveals that fairness metrics can mean very different things depending on the application. A "fair" hiring model and a "fair" policing model may require opposite approaches. Should fairness tooling be context-aware, or is it the user's responsibility to apply the right lens?
+3. **Gatekeeping: Who decides what counts as a "fairness" issue?** The maintainer's redirect to PyRIT suggests a practical division of labor within the fairness ecosystem. But it also raises the question: what criteria determine which forms of bias get dedicated tool support, and who is excluded from that decision-making? Communities whose harm doesn't fit existing frameworks may never get representation at all.
 
-### Why This Matters for Listeners
+### Why This Debate Won't Resolve Easily
 
-This isn't an abstract technical disagreement. The answer to "which metric?" and "who is this for?" determines whether a fairness tool empowers marginalized communities or gives companies a veneer of objectivity to shield them from scrutiny. The Fairlearn community's ongoing navigation of these questions — and their explicit acknowledgment that fairness is a sociotechnical challenge, not a solved optimization problem — is a model for how open-source communities can engage with ethical complexity honestly.
+- One side says *mission demands coverage*; the other says *scope enables focus*. Both are defensible.
+- The research base is young and contested — the speciesism-in-AI papers are published in specialized venues, not yet mainstream enough to be consensus.
+- The maintainers' identities matter: both Tamara Atanasoska and Roman Lutz are computational linguists. Their instinct to flag the NLP-vs-traditional-ML distinction reflects their expertise, but it may blind them to the moral argument.
+
+### Discussion Prompts for Our Listeners
+
+1. Should a fairness-auditing tool like Fairlearn covering only human demographics be considered incomplete — or is drawing a boundary around what to measure a practical necessity?
+2. If you were designing a fairness toolkit today, would you include species as a sensitive feature out of the box, or would you make it user-supplied and defer to community contributions?
+3. Does the maintainer's redirect to PyRIT reflect healthy ecosystem specialization, or does it risk creating an accessibility barrier where only projects with institutional backing can cover emerging bias categories?
+4. Who should get to define what counts as a "form of unfairness" — the tool's maintainers, its users, the affected communities, the academic literature, or some combination?
 
 ---
 
-## How to Contribute
+## How to Submit a Debate
 
-Know of another fairness debate unfolding on GitHub? Found a controversial issue thread? Open a PR or issue and we'll add it here with context drawn from both sides.
+1. Find an open GitHub issue in an active fairness/bias-auditing tool that surfaces a genuine disagreement
+2. Verify it's still active (comments within the last 30 days, not closed)
+3. Summarize it in the format above: background, positions, unresolved tension, and 3–4 discussion prompts
+4. Open a PR or file an issue in *this* repo with your submission
+
+We prioritize debates that center communities most affected by algorithmic harm, not just technologist-to-technician disagreements.
