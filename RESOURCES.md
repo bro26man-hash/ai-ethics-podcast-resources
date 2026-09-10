@@ -1,24 +1,26 @@
 # 🛠️ Open-Source Fairness & Bias-Auditing Projects
 
-Curated for the *AI Ethics & Social Justice Podcast* — live, active repositories where real debates about fairness measurement are happening right now.
+Curated for the *AI Ethics & Social Justice Podcast* — live, active repositories where real debates about fairness measurement are happening right now. Compiled during research for the episode on technology and social justice.
+
+These are the projects I found, read, and chose to feature because they are maintained, metric-rich, and genuinely contested in their issue trackers.
 
 ---
 
-## 1. [Fair-Code](https://github.com/yakew7/Fair-Code) — yakew7
+## 1. [AI Fairness 360 (AIF360)](https://github.com/Trusted-AI/AIF360) — Trusted-AI (IBM Research)
 
 | | |
 |---|---|
-| ⭐ Stars | 48 (growing fast in 2026) |
-| 🍴 Forks | 27 |
-| 👥 Contributors | 23 |
-| 📝 License | MIT |
-| 🌐 Website | [thefaircode.xyz](https://www.thefaircode.xyz) |
+| ⭐ Stars | ~2,860 |
+| 🍴 Forks | Active (check repo) |
+| 👥 Contributors | IBM Research + academic maintainers |
+| 📝 License | Apache-2.0 |
+| 🌐 Docs | [aif360.readthedocs.io](https://aif360.readthedocs.io/en/stable/) |
 
-**What it does:** End-to-end algorithmic bias detection and mitigation framework. Seven domain-specific audits — Criminal Justice (COMPAS), Hiring, Lending, Insurance Denial, Welfare Eligibility, Healthcare Readmission, and Tenant Screening — each with Jupyter notebooks, contaminated-vs-mitigated model comparisons, and a bias-fairness-reduction percentage.
+**What it does:** The most mature, comprehensive open-source bias-detection and mitigation toolkit. Ships **70+ fairness metrics** and **15+ debiasing algorithms** covering pre-processing, in-processing, and post-processing. Includes a Jupyter notebook tutorial layer and adapters for tabular data.
 
-**Why it matters:** Fair-Code is unusually concrete. It doesn't just theorize about fairness metrics — it selects a specific dataset, trains a biased model, drops protected attributes and proxy variables, retrains, and shows the exact gap reduction. Its companion tool, the Open Dataset Profiler, audits raw datasets for demographic under-representation. A benchmark harness (`faircode bench`) applies five mitigation strategies (S0–S4) across six fairness metrics and multiple model families. It also includes 53 plain-language explainers covering everything from false positive/negative asymmetry in healthcare to proxy entanglement and reject inference.
+**Why it matters:** AIF360 is the reference implementation many journalists and policymakers reach for when they want "the list" of fairness metrics. That authority is exactly what makes its internal debates important — when a metric's definition is disputed inside AIF360, it ripples into every article, audit, and courtroom presentation that cites it. See [DEBATES.md](#debatesmd) for one live example.
 
-**Podcast angle:** Fair-Code's Healthcare Readmission audit (#06) produced a counter-intuitive result: mitigations *increased* the gender gap from 0.02% → 0.04% without careful proxy handling. That result alone could fuel an entire episode about why imperfect mitigations can make things worse for some groups even as they improve others.
+**Podcast angle:** The project is mathematically deep but policy-facing. A dream case study for the show: a toolkit that literally *enumerates* fairness, and yet the act of enumeration is itself contested.
 
 ---
 
@@ -26,53 +28,62 @@ Curated for the *AI Ethics & Social Justice Podcast* — live, active repositori
 
 | | |
 |---|---|
-| ⭐ Stars | 2,284 |
-| 🍴 Forks | ~200 |
+| ⭐ Stars | ~2,280 |
+| 🍴 Forks | Active (check repo) |
 | 👥 Contributors | Core team: Microsoft + academic maintainers (Tamara Atanasoska, Roman Lutz, others) |
 | 📝 License | MIT |
 | 📖 Docs | [fairlearn.org](https://fairlearn.org) |
 
-**What it does:** The most widely-cited Python library for fairness assessment and mitigation. Implements demographic parity, equalized odds, counterfactual fairness, and constraint-based reduction methods (ExponentiatedGradient, ThresholdOptimizer). Integrates directly with scikit-learn, PyTorch, and pandas pipelines.
+**What it does:** A widely-cited Python library for fairness assessment and mitigation. Implements demographic parity, equalized odds, counterfactual fairness, and constraint-based reduction (ExponentiatedGradient, ThresholdOptimizer). Plugs directly into scikit-learn, PyTorch, and pandas pipelines.
 
-**Why it matters:** Fairlearn is the industry's reference implementation. When a debate breaks out inside Fairlearn's issue tracker, it reflects genuine disagreement among the people building the tools that millions of developers will eventually use. The current open discussion about scope, metrics, and who these tools should serve (see [DEBATES.md](#debatesmd)) illustrates the tension between a tool's stated mission and its practical boundaries.
+**Why it matters:** Fairlearn is explicit that fairness is a **sociotechnical** challenge, not a plug-and-play checklist. Its maintainers famously do **not** hard-code a list of sensitive features in the library — any column can be supplied as sensitive. That design decision is itself a philosophical statement, and a frequent source of boundary disputes (see [fairlearn#1625](https://github.com/fairlearn/fairlearn/issues/1625) on whether "species" belongs as a protected axis).
 
-**Podcast angle:** Fairlearn's maintainers explicitly say the project does *not* define a fixed list of sensitive features — users supply them. This design choice is itself a philosophical statement: fairness auditing is a context-dependent practice, not a plug-and-play checklist. That tension is the perfect hook for a discussion with listeners.
+**Podcast angle:** It's a portrait of a Microsoft-backed "community" project negotiating *what it should protect*. Demands to expand scope (e.g., NLP/speciesist bias) keep colliding with its architectural identity as a general tabular-fairness engine.
 
 ---
 
-## 3. [CognitiveLens](https://github.com/AmirhosseinHonardoust/Cognitivelens-AI-Human-Comparison) — AmirhosseinHonardoust
+## 3. [AI Bias Audit Tool](https://github.com/srhill12/ai-bias-audit-tool) — Steven Hill (Purdue)
 
 | | |
 |---|---|
-| ⭐ Stars | 20 |
-| 🍴 Forks | 0 |
-| 👥 Contributors | 1 (original author) |
-| 📝 License | MIT |
-| 🛠️ Stack | Python, Streamlit, Plotly |
+| ⭐ Stars | Small (check repo) |
+| 🍴 Forks | — |
+| 👥 Contributors | 1 (author) |
+| 📝 License | Not specified |
+| 🛠️ Stack | Python, Streamlit |
 
-**What it does:** An interactive Streamlit dashboard for comparing human vs. AI decision-making. Computes Cohen's κ, AUC, Brier score, and subgroup fairness gaps. Users upload their own CSV data and explore where models diverge from human judgments across demographics.
+**What it does:** A Streamlit web app that audits the **COMPAS Recidivism Risk Score** — the algorithm ProPublica (2016) found to show significant racial bias. It computes industry-standard fairness metrics (demographic parity difference, disparate impact / 80% rule, false positive/negative rate parity, equalized odds, accuracy by group), visualizes disparities, and emits a plain-text audit report aligned with the **NIST AI Risk Management Framework (MAP · MEA · MGO)**.
 
-**Why it matters:** CognitiveLens foregrounds the *alignment* problem — not just "is this biased?" but "does the AI agree with human judgment, and if so, is that agreement itself biased?" The tool's calibration views make it easy to spot cases where models are confidently wrong for specific subgroups, which is where fairness harms are most acute.
+**Why it matters:** This is the "applied" counterweight to the big toolkits. It takes one high-stakes, real-world criminal-justice algorithm and runs the full measurement pipeline end-to-end. It's a great demo of how a fairness *audit* is actually performed — and where it still falls short (personal, single-maintainer project with no open issues yet).
 
-**Podcast angle:** What happens when human labels are themselves biased? CognitiveLens lets you overlay human and AI decisions, making that question visible. A clinician who agrees with an AI's discriminatory recommendation appears as "alignment," not injustice — and the tool makes that paradox clear.
+**Podcast angle:** COMPAS is the case that _started_ the modern fairness-in-criminal-justice conversation. Running it through a NIST-AI-RMF-aligned audit lens lets the episode bridge the ProPublica journalism of 2016 with today's "governance" vocabulary.
 
 ---
 
-## Honorable Mention: [Unbiased AI Decision](https://github.com/Saikrishna-dev-oss/unbiased-ai-decision) — Saikrishna-dev-oss
+## Also discovered (worth a look / future episodes)
 
-A smaller, prototype web tool for running demographic-parity audits against CSV uploads. Useful as a contrast case: a one-person project whose simplicity raises its own questions about depth vs. accessibility in fairness tooling.
+These turned up in research and are active enough to track, but didn't make the feature three:
+
+| Project | Owner | Angle |
+|---|---|---|
+| [Bias-and-Fairness-Auditing-Tool](https://github.com/rara1803/Bias-and-Fairness-Auditing-Tool) | rara1803 | End-to-end bias detection + mitigation, multi-model |
+| [Algorithmic-Fairness-Toolkit](https://github.com/NikhilRajBharti26-gif/Algorithmic-Fairness-Toolkit) | NikhilRajBharti26-gif | Bias auditing + mitigation across demographic groups |
+| [Informations-Ethics (Ethical-Data-Checker)](https://github.com/matthaioum/Informations-Ethics---Ethical-Data-Checker) | matthaioum | R Shiny pre-ML dataset audit: bias detection, demographic parity, disparate impact |
+| [compas-fairness-audit](https://github.com/leonardphokane/compas-fairness-audit) | leonardphokane | Notebook-based COMPAS audit with policy guidelines |
+| [Insurance-premium-fairness-analyser](https://github.com/harshitha53143/Insurance-premium-fairness-analyser-) | harshitha53143 | Automated audit of insurance pricing for demographic bias & proxy discrimination |
+| [AI-Ethics-Fairness-Audit](https://github.com/E-Macharia/AI-Ethics-Fairness-Audit) | E-Macharia | Case studies on hiring tools + facial recognition |
 
 ---
 
 ## How to Add a Project
 
 1. Fork this repo
-2. Create a new section in `RESOURCES.md` following the table format above
-3. Include: name, owner, GitHub link, key stats (stars, forks, license), what it does, why it matters, and a podcast angle
-4. Open a PR with your additions
+2. Add your entry following the table format above
+3. Include: name, owner, GitHub link, key stats (stars/forks/license), what it does, why it matters, and a podcast angle
+4. Open a PR describing what you added and why
 
 We prioritize tools that:
 - Have been updated within the last 12 months
-- Have a clear open-source license
-- Center communities most affected by algorithmic harm, not just technologists
-- Surface genuine debates about fairness measurement or tool scope
+- Carry a clear open-source license
+- Center communities most affected by algorithmic harm, not only technocrats
+- Surface genuine disagreements about how to measure fairness or whom to serve
