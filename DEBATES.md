@@ -1,50 +1,57 @@
 # AI Ethics Podcast — Ongoing Fairness Debates on GitHub
 
-Real disputes from the fairness-tooling community that illuminate the tensions between ethical ideals and real-world deployment. Compiled for the **AI Ethics & Social Justice Podcast**.
+Real disputes from the fairness-tooling community that illuminate the tensions between ethical ideals and real-world deployment. Curated for the **AI Ethics & Social Justice Podcast**.
 
 ---
 
-## Debate: Does `average_odds_difference = 0` really mean "equalized odds"? — A fight over how to *define* a fairness metric
+## Debate: Should a Fairness Tool Recognize "Species" as a Sensitive Feature for Bias Evaluation?
 
-**Source:** [Trusted-AI/AIF360#528](https://github.com/Trusted-AI/AIF360/issues/528) (Opened Apr 2024, still open — unresolved)
-**Reporter:** @AndreFCruz  |  **Product involved:** AI Fairness 360 (IBM)
-**Core question:** *How do we measure fairness — and who gets to decide what a metric "means"?*
+**Source:** [fairlearn/fairlearn#1625](https://github.com/fairlearn/fairlearn/issues/1625) (Opened Feb 2026, still open as of Jul 2026)
 
-### The claim
+**Context:** A community contributor proposed adding "species" (animal species) as a recognized sensitive feature in Fairlearn's fairness evaluation framework, citing a growing body of peer-reviewed research documenting speciesist bias in AI systems. What followed was a nuanced disagreement between a community member and two maintainers about what a fairness library *should* cover, who its audiences are, and where to draw the boundary between "bias we resolve to measure" and "bias we treat as someone else's problem."
 
-The AIF360 documentation (and, reporter notes, an IBM-authoredwebinar) describes the `average_odds_difference` metric as "a value of 0 indicates equality of odds." @AndreFCruz argues this is **mathematically wrong**.
+### Core Positions
 
-A value of `0` for average odds difference only guarantees that the ** averages** of the true-positive-rate and false-positive-rate gaps across groups are zero. It is perfectly possible for each group's TPR and FPR to differ **while those differences cancel out in the average** — producing `average_odds_difference = 0` even though **neither** equalized odds (nor even separate TPR/FPR parity) holds for any pair of groups.
+**Pro-Inclusion — @samtuckerdavis (community contributor):**  
+The proposal is grounded in specific, peer-reviewed research:
+- **Hagendorff, Bossert, Tse & Singer (2023).** *"Speciesist bias in AI."* AI and Ethics. Found GPT-3 associates farmed animals with violence; explicitly calls for fairness frameworks to include speciesist bias metrics. [DOI: 10.1007/s43681-023-00380-w](https://doi.org/10.1007/s43681-023-00380-w)
+- **Takeshita et al. (2022).** BERT and RoBERTa associate harmful words with nonhuman animals. *Information Processing & Management.*
+- **Hagendorff et al. (2025).** SpeciesismBench (1,003 items): LLMs "frequently normalized harm toward farmed animals while refusing to do so for non-farmed animals."
+- **AI-for-Animals (2025).** AHA Benchmark (4,350 items): species-dependent risks of harm in LLM outputs.
 
-Put concretely: two points on a line can average to zero without either being zero, so a "fair" average-odds score can mask real, group-specific misclassification disparities. The reporter flags the same error in an IBM-cited resource, suggesting the misstatement has spread beyond AIF360 into IBM's own corporate-facing fairness documentation.
+The contributor argues that Fairlearn — a Microsoft-backed project with strong academic credibility — acknowledging species-based discrimination would set an important precedent. They also pledged to contribute documentation, example notebooks, or metric implementations themselves.
 
-### Why this matters beyond one library
+**Respectful Skepticism — @TamaraAtanasoska (maintainer, computational linguist):**  
+While sympathetic to the cause, the maintainer raised three substantive objections:
+1. **Domain mismatch.** All the cited research concerns NLP and language models, while Fairlearn has no NLP components and is designed for traditional (tabular, classification) ML. The tool's architecture and metric suite are not built for text-based bias signals.
+2. **No fixed sensitive-feature list.** Fairlearn deliberately does not define a canonical list of sensitive attributes in code — any column can become a sensitive feature. The documented list in the User Guide is *non-exhaustive* — just a few illustrative examples ("race, gender, age, etc."). Adding species would imply formalizing it in a way that contradicts this design philosophy.
+3. **Opportunity cost.** Documentation and example notebooks are finite resources. Adding a highly specialized topic may distract from the core fairness dimensions (race, gender, socioeconomic status) that the vast majority of practitioners need.
 
-1. **The "fairness by arithmetic" trap.** Auditors (and journalists) often pick a single metric, plug in a number, and call a model "fair" or "unfair." If the metric's definitional guarantee is itself wrong, every audit that treats a zero average-odds gap as proof of equalized odds is silently wrong — possibly legitimizing a discriminatory model.
-2. **Metrics trade off against each other.** A well-known result (Chouldechova 2017; Kusner et al. 2017) shows that satisfying one fairness criterion can make another mathematically impossible for the same model. But that entire edifice rests on metrics meaning what they say. If a core metric is *mislabeled*, the claimed trade-off landscape shifts under your feet.
-3. **Who defines the terms propagates into policy.** AIF360 is the reference implementation journalists and regulators cite. A documentation error in an IBM-backed, Apache-licensed toolkit doesn't stay in the repo — it shows up in compliance reports, audit dashboards, and courtroom testimony. The "who gets to define fairness" question is, here, answered by a docstring and a webinar slide.
-4. **Open-source as a place where fairness is *argued*, not just computed.** This issue is a clean reminder that the fiercest fairness debates are not only in classrooms or courts — they're in public issue threads, where the engineers building the tools argue (sometimes for years) over first principles.
+**Cross-Pollination Suggestion — @romanlutz (maintainer, PyRIT team):**  
+"This is very much in scope for [Microsoft's PyRIT](https://github.com/microsoft/PyRIT) library!" — pointing the contributor toward a broader responsible-AI toolkit that covers NLP, generative AI, and multiple bias dimensions including species, rather than directing the effort at Fairlearn specifically.
 
-### Positions (as of the latest read)
+### The Unresolved Tension
 
-- **@AndreFCruz (reporter / mathematician):** Stands by the definitional critique. The docstring claim and the IBM webinar are both incorrect; a zero average-odds difference is strictly weaker than equalized odds. The error is also present in an IBM-cited resource, amplifying its real-world reach. (Issue carries +2 reactions from community members who agree.)
-- **Maintainers (Trusted-AI / IBM):** No response or correction posted in the thread — the issue remains open and unresolved. The silence is itself notable: a definitional error in a flagship metric has gone unaddressed in the reference implementation's public tracker.
+This debate crystallizes three questions that remain deeply relevant to the entire fairness-tooling ecosystem:
 
-### Open questions for listeners
+1. **Where does one fairness tool's responsibility end and another's begin?** Fairlearn covers traditional ML; PyRIT covers NLP and generative AI. But the boundary isn't always clean — the same biased model might be audited through different lenses depending on who's using which tool. Does splitting responsibilities across projects make fairness *more* manageable, or does it create gaps where no one feels accountable?
+2. **Should fairness tools be "domain-general" or "domain-specific"?** A tool that tries to cover everything risks shallow treatment of each domain. A tool that covers one domain well risks excluding affected communities whose bias doesn't fit that domain. Fairlearn's choice to be domain-general (any column can be sensitive) while also curating illustrative examples creates this exact tension.
+3. **Who gets to define what counts as "fairness"?** The contributor brought citations from animal-welfare researchers arguing speciesist bias is measurable harm. The maintainers responded that *their* community (traditional ML practitioners) has different priorities. This question — who defines the fairness framework, and whose expertise is centered — isn't just about species. It's about race, gender, disability, and every axis along which AI systems can cause harm.
+4. **Is "not now" the same as "never"?** When maintainers say this isn't in scope for Fairlearn but is for PyRIT, they're making a practical decision about project resources. But for the communities affected by speciesist AI harm, "not in scope" can feel like invisibility. How should open-source fairness projects communicate trade-offs without reinforcing the very power asymmetries they aim to address?
 
-- If a widely-cited library mislabels a metric, is the fix a docstring, or does it demand re-running every audit that used that metric as "equalized odds"?
-- Is it acceptable for a reference fairness toolkit to carry a known-defective metric for years as long as nobody files a second issue?
-- When the same toolkit is used by *both* journalists and defendants in algorithmic-harm cases, does a math-education failure become a justice problem?
+### Why This Matters for Listeners
 
-This is a live, unpitched debate you can follow: [Trusted-AI/AIF360#528](https://github.com/Trusted-AI/AIF360/issues/528).
+This isn't an abstract technical disagreement. The answer to "which forms of bias should our tools cover?" determines whether marginalized communities are visible in the fairness infrastructure — or rendered invisible by a tool that only looks the way *its creators* think to look. The Fairlearn community's navigation of this question — listening respectfully, explaining their technical constraints, and redirecting to a more relevant project — is a model for how open-source ethics code *could* work. But it's also a reminder that redirection only works if the redirected project actually acts on it.
+
+This is a live debate you can follow: [fairlearn/fairlearn#1625](https://github.com/fairlearn/fairlearn/issues/1625).
 
 ---
 
 ## How to Contribute
 
-Know of another fairness debate unfolding on GitHub? Found a controversial issue thread where the community is wrestling with an ethical question? Open a PR or file an issue (use the `[DISCUSSION]` tag) with:
+Know of another fairness debate unfolding on GitHub? Found a controversial issue thread where the community is wrestling with an ethical question? Open a PR or issue with:
 - The GitHub issue link
-- A summary of the positions taken (fairly — represent all sides)
+- A summary of the positions taken
 - Why it matters for the podcast
 
-We prioritize debates that center the perspectives of communities most affected by algorithmic harm, not only technocrats and policymakers. When summarizing, quote directly when possible and link to exact comments rather than whole threads.
+We prioritize debates that center the perspectives of communities most affected by algorithmic harm, not just technologists and policymakers.
