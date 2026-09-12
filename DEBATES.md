@@ -1,71 +1,67 @@
-# ⚔️ Unresolved Debates in Fairness Tooling — Extracted from Real GitHub Issue Threads
+# ⚡ Ongoing Debates in AI Fairness
 
-These are genuine, ongoing disagreements from one of the most active open-source fairness communities. They are not theoretical — they shape the tools that real organizations use to measure and mitigate algorithmic bias.
-
----
-
-## Debate #1: How Should We Measure Fairness? The `MetricFrame` API War
-
-**Source:** [fairlearn/fairlearn issue #756](https://github.com/fairlearn/fairlearn/issues/756)
-**Status:** Open, 74 comments, unresolved as of 2024
-**Labels:** `API`
-
-### The Core Tension
-
-Fairlearn's `MetricFrame` is its flagship feature — it lets you compute fairness metrics disaggregated by sensitive attributes. But the API only supports metrics with the signature `metric(y_true, y_pred)` (i.e., standard classification/regression metrics).
-
-The author and maintainer, **MiroDudik**, wants to expand `MetricFrame` to support:
-
-1. **Metrics that don't use `y_true` and `y_pred`** — e.g., demographic parity (which only needs `y_pred`), streaming metrics, and metrics for contextual bandits or cost-sensitive learning.
-2. **Flexible keyword arguments** — so users can pass arbitrary parameters without wrapping their metrics in adapter functions.
-
-The proposed new API:
-```python
-# Current API
-MetricFrame(metric, y_true, y_pred, *, sensitive_features, control_features=None, sample_params=None)
-
-# Proposed API
-MetricFrame(*, metrics, y_true=None, y_pred=None, sensitive_features, control_features=None, sample_params=None)
-```
-
-### The Three Sides of the Debate
-
-#### 🟢 MiroDudik — "The tool should be as flexible as the problems we face"
-- Argues that the current API is *"really limiting us"* and commits Fairlearn to a narrow definition of fairness measurement.
-- Provides detailed examples (Scenarios 1–4) showing how real-world use cases — cost-sensitive learning, contextual bandits, streaming metrics — require metrics beyond `metric(y_true, y_pred)`.
-- Proposes a gradual transition: deprecation warnings → keyword-only args → optional `y_true`/`y_pred`.
-- Views this as essential for serving communities whose fairness problems don't fit the classification mold (e.g., resource allocation, lending with partial observations).
-
-#### 🔴 riedgar-ms — "Don't break what works; build something new instead"
-- Strongly opposes making `y_true` and `y_pred` optional: *"That is not how sklearn metrics work."*
-- Argues `**kwargs` is a "really subtle" source of bugs that *"can elevate typos into really subtle bugs"*.
-- Prefers to keep `MetricFrame` doing one thing well (disaggregated sklearn-style metrics) and create a **separate class** for other problem types.
-- Accommodating — agreed to rename `metric` → `metrics` and add keyword args, but drew the line at optional `y_true`/`y_pred`.
-- Frames this as a product question: *"What should MetricFrame be?"* — not just an API question.
-
-#### 🟡 hildeweerts & romanlutz — "Show us examples before committing; protect novices"
-- Both maintainers who initially opposed the change, then warmed to Alternative A (optional `y_true`/`y_pred`) *only after* MiroDudik provided concrete scenarios.
-- Expresses concern that Alternative B (`**kwargs`) introduces *"too much magic"* that makes code harder to read and debug.
-- Emphasizes that the *"majority of users will be looking for classification/regression metrics"* and that complicating the API for edge cases may overwhelm newcomers.
-- Partners with riedgar-ms in wanting a clean migration path (deprecation warnings before breaking changes).
-
-### The Deeper Philosophical Fault Lines
-
-| Question | MiroDudik's position | riedgar-ms's position |
-|----------|----------------------|-----------------------|
-| What is `MetricFrame` for? | A general-purpose fairness measurement tool for any ML paradigm | A specialist tool for disaggregated sklearn-style metrics |
-| Who should it serve? | Advanced users with non-standard fairness problems | Novice users who need an intuitive, predictable API |
-| How do you handle trade-offs? | Flexibility through optional arguments and `sample_params` | Separation of concerns — new class for new problem types |
-| What's the cost of complexity? | Worth it to avoid forcing users into awkward workarounds | Hidden bugs, documentation burden, and broken existing code |
-
-### Why This Matters for Our Podcast
-
-This debate is not just about Python API design. It's about:
-
-- **What counts as a fairness problem?** When the tool only handles `y_true`/`y_pred` metrics, it implicitly defines algorithmic harm as something that occurs in classification/regression. But the most consequential algorithmic decisions — resource allocation, predictive policing won't be caught, welfare eligibility — don't fit that mold.
-- **Who gets to define fairness metrics?** The maintainers of a widely-used tool are making political decisions about which fairness definitions and measurement approaches are accessible. Their API choices shape what the broader community can even *ask* of an algorithm.
-- **Accessibility vs. ambition.** A tool that's easy for beginners to use may not serve the communities with the most complex fairness needs. A tool that's powerful and flexible may be impenetrable to non-technical stakeholders.
+A living document summarizing real controversies from open-source fairness toolkits — perfect material for podcast deep-dives.
 
 ---
 
-*More debates to be added. Found a controversial fairness issue thread? Open an issue in this repo!*
+## 🔥 Debate #1: How Should Fairness Metrics Handle Non-Standard Data?
+
+**Source:** [fairlearn/fairlearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756)
+**Labels:** `API` | **Status:** Open (74 comments, no resolution)
+**Date opened:** April 2021 | **Last updated:** September 2021 (still open!)
+
+### The Core Question
+
+Microsoft's Fairlearn toolkit measures fairness by comparing model predictions across demographic groups. Its central tool, `MetricFrame`, was designed for standard classification/regression metrics that take `(y_true, y_pred)` as arguments. But real-world fairness evaluation often needs metrics that *don't* fit that pattern — for example:
+
+- **Contextual bandit fairness**: In lending, you only observe repayment (reward) for the loan type you offered (action), not for counterfactual alternatives.
+- **Cost-sensitive learning**: The metric depends on cost matrices, not predicted labels.
+- **Streaming metrics**: Data arrives continuously; you don't have a fixed dataset to score against.
+- **Dataset-only metrics**: Metrics like demographic parity only need the dataset, not a model's predictions.
+
+The question: **Should Fairlearn's `MetricFrame` be redesigned to support these non-standard metrics, or should separate tools be built for different problem domains?**
+
+### The Two Positions
+
+#### 🟢 Position A: Expand MetricFrame (MiroDudik, Fairlearn maintainer)
+
+- Make `y_true` and `y_pred` *optional* keyword arguments (defaulting to `None`).
+- This lets users pass any metric signature, from classification to bandits, without "dummy" arguments.
+- **Key quote:** *"The current API is really limiting us, so I'd rather fix this sooner rather than commit to the future of docs that describe all kinds of workarounds."\*
+- **Underlying philosophy:** A fairness tool should be a *universal framework* for evaluating any ML system, regardless of problem type. Flexibility matters more than simplicity.
+
+#### 🔴 Position B: Keep MetricFrame Focused (riedgar-ms, hildeweerts, other maintainers)
+
+- `y_true` and `y_pred` should remain **required** arguments. Making them optional opens new failure modes and dilutes the tool's clarity.
+- `**kwargs` (the proposed way to pass arbitrary parameters) is dangerous: any future parameter name could collide with a user's keyword, creating subtle bugs.
+- Different problem types (reinforcement learning, NLP, vision) have fundamentally different metric needs — they deserve *separate classes*, not a bloated generalist.
+- **Key quote (hildeweerts):** *"The majority of users will be looking for classification/regression metrics and may not even be familiar with reinforcement learning. Having to look at examples to understand how to use an API even in the 'simplest' scenario signals that it is not intuitive."*
+- **Underlying philosophy:** A fairness tool should do *one thing well* and stay accessible to non-experts. "Capable of everything" often means "confusing for everyone."
+
+### Where It Ended Up
+
+The community eventually converged on a **compromise ("Alternative A")**:
+- `y_true` and `y_pred` become *optional* (keyword-only, defaulting to `None`).
+- No `**kwargs` — a `sample_params` dictionary still handles extra arguments.
+- This covers streaming, bandit, and cost-sensitive scenarios without full `**kwargs` flexibility.
+
+**But the issue remains open.** The philosophical tension — between generality and clarity, between power users and novices — has not been resolved. As of the latest update, this debate has been running for **over three years**.
+
+### 🎙️ Podcast Talking Points
+
+1. **Who does a fairness tool serve?** The maintainer argues for liberty-loving data scientists who need flexibility; his colleagues argue for the typical user who just wants a simple, predictable API.
+2. **Can "fairness" be measured a single way?** The existence of 10+ competing fairness metrics (demographic parity, equalized odds, predictive parity…) suggests there's no neutral answer — each metric encodes a different theory of justice.
+3. **Does tool design reflect power dynamics?** When a maintainer pushes for `**kwargs` and others resist, is that a technical debate — or a power struggle over who gets to define what "fairness" means?
+4. **The long tail of open issues:** This issue has been open since 2021. What does it mean that the fairness community spends years debating API design while real-world biased algorithms keep running?
+
+---
+
+## 📝 Contributing Debates
+
+Have you found another heated thread in a fairness repo? Add it here!
+
+| Issue | Repo | Core Question |
+|---|---|---|
+| [fairlearn #756](https://github.com/fairlearn/fairlearn/issues/756) | fairlearn/fairlearn | Should `MetricFrame` support metrics without `y_true`/`y_pred`? |
+
+To add a new debate: fork this repo, append to `DEBATES.md`, and open a PR!
