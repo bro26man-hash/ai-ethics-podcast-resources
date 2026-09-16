@@ -1,124 +1,76 @@
-# ⚡ Ongoing Debates in AI Fairness
+# AI Ethics Podcast — Ongoing Debates
 
-A living document summarizing real controversies from open-source fairness toolkits — perfect material for podcast deep-dives.
-
----
-
-## 🔥 Debate #1: How Should Fairness Metrics Handle Non-Standard Data?
-
-**Source:** [fairlearn/fairlearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756)
-**Labels:** `API` | **Status:** Open (74 comments, no resolution)
-**Date opened:** April 2021 | **Last updated:** September 2021 (still open!)
-
-### The Core Question
-
-Microsoft's Fairlearn toolkit measures fairness by comparing model predictions across demographic groups. Its central tool, `MetricFrame`, was designed for standard classification/regression metrics that take `(y_true, y_pred)` as arguments. But real-world fairness evaluation often needs metrics that *don't* fit that pattern — for example:
-
-- **Contextual bandit fairness**: In lending, you only observe repayment (reward) for the loan type you offered (action), not for counterfactual alternatives.
-- **Cost-sensitive learning**: The metric depends on cost matrices, not predicted labels.
-- **Streaming metrics**: Data arrives continuously; you don't have a fixed dataset to score against.
-- **Dataset-only metrics**: Metrics like demographic parity only need the dataset, not a model's predictions.
-
-The question: **Should Fairlearn's `MetricFrame` be redesigned to support these non-standard metrics, or should separate tools be built for different problem domains?**
-
-### The Two Positions
-
-#### 🟢 Position A: Expand MetricFrame (MiroDudik, Fairlearn maintainer)
-
-- Make `y_true` and `y_pred` *optional* keyword arguments (defaulting to `None`).
-- This lets users pass any metric signature, from classification to bandits, without "dummy" arguments.
-- **Key quote:** *"The current API is really limiting us, so I'd rather fix this sooner rather than commit to the future of docs that describe all kinds of workarounds."*
-- **Underlying philosophy:** A fairness tool should be a *universal framework* for evaluating any ML system, regardless of problem type. Flexibility matters more than simplicity.
-
-#### 🔴 Position B: Keep MetricFrame Focused (riedgar-ms, hildeweerts, other maintainers)
-
-- `y_true` and `y_pred` should remain **required** arguments. Making them optional opens new failure modes and dilutes the tool's clarity.
-- `**kwargs` (the proposed way to pass arbitrary parameters) is dangerous: any future parameter name could collide with a user's keyword, creating subtle bugs.
-- Different problem types (reinforcement learning, NLP, vision) have fundamentally different metric needs — they deserve *separate classes*, not a bloated generalist.
-- **Key quote (hildeweerts):** *"The majority of users will be looking for classification/regression metrics and may not even be familiar with reinforcement learning. Having to look at examples to understand how to use an API even in the 'simplest' scenario signals that it is not intuitive."*
-- **Underlying philosophy:** A fairness tool should do *one thing well* and stay accessible to non-experts. "Capable of everything" often means "confusing for everyone."
-
-### Where It Ended Up
-
-The community eventually converged on a **compromise ("Alternative A")**:
-- `y_true` and `y_pred` become *optional* (keyword-only, defaulting to `None`).
-- No `**kwargs` — a `sample_params` dictionary still handles extra arguments.
-- This covers streaming, bandit, and cost-sensitive scenarios without full `**kwargs` flexibility.
-
-**But the issue remains open.** The philosophical tension — between generality and clarity, between power users and novices — has not been resolved. As of the latest update, this debate has been running for **over three years**.
-
-### 🎙️ Podcast Talking Points
-
-1. **Who does a fairness tool serve?** The maintainer argues for liberty-loving data scientists who need flexibility; his colleagues argue for the typical user who just wants a simple, predictable API.
-2. **Can "fairness" be measured a single way?** The existence of 10+ competing fairness metrics (demographic parity, equalized odds, predictive parity…) suggests there's no neutral answer — each metric encodes a different theory of justice.
-3. **Does tool design reflect power dynamics?** When a maintainer pushes for `**kwargs` and others resist, is that a technical debate — or a power struggle over who gets to define what "fairness" means?
-4. **The long tail of open issues:** This issue has been open since 2021. What does it mean that the fairness community spends years debating API design while real-world biased algorithms keep running?
+A collection of real, open controversies from the algorithmic fairness research community, drawn from active GitHub discussions. Each entry includes the source issue link so listeners can follow the thread themselves.
 
 ---
 
-## 🔥 Debate #2: What Do Fairness Metrics Actually Measure? The Utility-vs-Fairness War Inside AIF360
+## 🏛️ Debate 1: Who Should AI Fairness Tools Serve — Humans Only, or All Sentient Beings?
 
-**Source:** [Trusted-AI/AIF360 Issue #214](https://github.com/Trusted-AI/AIF360/pull/214) (and extended discussion in comments)
-**Labels:** `metrics` | **Status:** Open (9 comments, over 3 years)
-**Date opened:** November 2020 | **Last updated:** February 2023
+**Source:** [fairlearn/fairlearn Issue #1625](https://github.com/fairlearn/fairlearn/issues/1625)
+**Status:** Open
+**Key tension:** Scope vs. moral expansion
 
-### The Core Question
+### The Proposal
+A contributor (@samtuckerdavis) proposed adding **"species"** as a recognized sensitive feature in Fairlearn's fairness evaluation framework. Citing peer-reviewed research showing measurable species-based bias in AI systems (Hagendorff et al. 2023; Takeshita et al. 2022; Hagendorff et al. 2025), the proposal argues that Fairlearn — a tool whose mission is "to empower developers to assess and improve the fairness of AI systems" — should acknowledge speciesist bias as a legitimate fairness category.
 
-AIF360 categorizes several "inequality indices" (like the Generalized Entropy Index, GEI) as *individual fairness metrics*. But a contributor named **leenamurgai** made a startling claim: **these indices don't measure fairness at all — they measure utility.** This isn't a refactoring suggestion; it's a fundamental challenge to how the toolkit classifies its own measurements.
+### The Counter-Argument (from maintainers)
+Both Tamara Atanasoska and Roman Lutzu (Fairlearn maintainers) pushed back — but not in the way you might expect:
 
-### The Three Positions
+1. **No fixed scope exists.** Fairlearn doesn't maintain a locked list of sensitive features. "Any column of information can become a sensitive attribute or a proxy for it. The sensitive attribute is just a variable."
 
-#### 🟢 leenamurgai — "These are utility metrics disguised as fairness metrics"
+2. **Fairlearn has no NLP component.** All the cited research is about language models and NLP bias. Fairlearn is built for "traditional" machine learning (tabular data, classifiers). The maintainer suggested the discussion belongs in a project that handles NLP, like PyRIT.
 
-- Submitted a long mathematical proof showing that GEI can be rewritten as a function of two parameters: **model accuracy (λ)** and **mean benefit (μ)** — both utility concepts, not fairness concepts.
-- Proved that minimizing GEI is equivalent to minimizing cross-entropy loss (when α=0) or mean squared error (when α=2) — both standard ML optimization objectives, not fairness objectives.
-- Argued that the two "individual fairness" definitions in the literature are **contradictory at a conceptual level**: Dwork et al. (2011) defines individual fairness as a property of a *single map* (ground truth provided by a similarity metric), while Speicher et al. (2018) defines it via distributional comparisons. You can't classify both as "individual fairness."
-- **Key quote:** *"It is misleading to have GEE categorised under individual fairness metrics alongside consistency. Individual fairness as defined by Dwork et al. is importantly not a measure of utility."*
-- Concluded that the famous "fairness-utility trade-off" paper isn't showing a trade-off between group fairness and individual fairness at all — it's just showing the well-known utility-vs-fairness trade-off.
-- **Political implication:** If we miscategorize utility as fairness, we risk *selling* utility optimization to policymakers as if it were fairness enforcement. "Choosing a benefit function is choosing whose interests count as 'beneficial' — and that's a political decision, not a technical one."
+### Why This Matters for the Podcast
+This debate cuts to the heart of a fundamental question in AI ethics: **should fairness tools have a defined moral constituency, or should they be infinitely expandable?**
 
-#### 🟡 hoffmansc — "They measure a different kind of fairness — let's call it 'distributional fairness'"
+- If the answer is *"anyone (or anything) impacted by algorithmic decisions can be a constituency"* — then the tool becomes a universal instrument, and the real question shifts to *who defines what counts as a legitimate "sensitive attribute"?* (That's a political and philosophical act dressed as a technical one.)
 
-- Agreed that GEI doesn't match Dwork et al.'s definition of individual fairness.
-- But pushed back on the claim that it's *only* utility: GEI has no dependence on the feature space X (it's "anonymous" — only looks at predictions and ground truth), which is similar to utility functions but could still measure a *distributional* property.
-- Proposed reclassifying these indices as **"distributional fairness"** metrics — a separate category from both individual fairness and group fairness.
-- Asked practical questions: Should we calculate overall GEI or only between-group? What about within-group? These questions have real implications for how auditors interpret results.
-- **Key quote:** *"Perhaps we could categorize them separately as, say, 'distributional fairness'?"*
-- Showed willingness to accept leenamurgai's findings and update documentation, but wanted careful treatment.
+- If the answer is *"fairness tools serve a specific, bounded set of beings"* — then someone is making a deliberate exclusion, and that exclusion needs to be named, justified, and debated. (Arguments of "scope" and "tool purpose" can mask lacunae.)
 
-#### 🔴 The Implicit Position — "This doesn't matter in practice"
-
-- The debate has received **9 comments over 3 years** and remains unresolved. Several core maintainers of AIF360 (including Kurt Varshney, Michael Hind) have not weighed in on the mathematical substance.
-- The metrics remain categorized as "individual fairness" in the documentation and sklearn API.
-- **What this silence means:** Either the maintainers haven't engaged with the critique, or they consider it too theoretical for practical impact. Both possibilities are concerning for a toolkit used by real auditors and policymakers.
-
-### Why This Debate Matters for Social Justice
-
-This isn't an abstract math dispute. It has real consequences:
-
-1. **Misleading governance:** If AIF360 labels a utility metric as "individual fairness," an auditor using the toolkit might believe they are enforcing a rigorous fairness standard when they are merely optimizing model performance. This could lead to false certification of biased systems as "fair."
-
-2. **Whose interests count?** The benefit function at the heart of GEI encodes *whose outcomes count as beneficial*. When leenamurgai asks "is it meaningful to ignore people if you're trying to be fair?", he's asking whether fairness metrics should consider *everyone* affected — or only the groups explicitly designated as sensitive attributes. If a welfare algorithm's benefit function only looks at qualification rates, it may miss the community that considers *being considered human* the baseline benefit.
-
-3. **The language problem:** The debate about whether to call these metrics "fairness" or "utility" echoes the broader argument in issue #97 about whether a tool can even "remove bias." If we can't agree on what our tools measure, how can we trust what they tell us?
-
-### 🎙️ Podcast Talking Points
-
-1. **The marketing problem:** Fairness toolkits sell "fairness" to companies and governments. If the metrics inside are really measuring utility, the product is fundamentally misrepresented. Who bears the cost of that misrepresentation?
-2. **The(约) "Who is the customer?" question:** Fairlearn maintainers debate whether MetricFrame should serve data scientists or the communities affected by models. AIF360 maintainers haven't weighed in on whether their metrics serve auditors or utility optimizers. Are these the same question?
-3. **The silence is also a position:** When senior maintainers don't respond to a 3-year-old mathematical critique, what message does that send about the community's commitment to intellectual honesty?
-4. **The Dwork vs. Speicher paradox:** Two foundational papers define "individual fairness" in contradictory ways. Both are widely cited. Neither Wikipedia nor the textbooks reconcile them. How did the field get here?
+### Discussion Questions
+1. Should a fairness tool like Fairlearn formally recognize animal welfare as a fairness concern, even if it has no NLP capabilities?
+2. Who gets to decide which groups are "in scope" for algorithmic fairness? The maintainers? The community? The users?
+3. If the tool *technically* supports any attribute but its docs only list human demographics, is that a form of exclusion by omission?
+4. How should we think about the tension between a tool's *stated mission* (empower developers to improve fairness) and its *practical scope* (tabular ML only)?
 
 ---
 
-## 📝 Contributing Debates
+## ⚖️ Debate 2: Can You Trust Algorithmic Fairness if You Can't Reproduce It?
 
-Have you found another heated thread in a fairness repo? Add it here!
+**Source:** [fairlearn/fairlearn Issue #1261](https://github.com/fairlearn/fairlearn/issues/1261)
+**Status:** Open (21 comments)
+**Key tension:** Reproducibility vs. the inherent randomness of fairness algorithms
 
-| Issue | Repo | Core Question |
-|---|---|---|
-| [fairlearn #756](https://github.com/fairlearn/fairlearn/issues/756) | fairlearn/fairlearn | Should `MetricFrame` support metrics without `y_true`/`y_pred`? |
-| [AIF360 #214](https://github.com/Trusted-AI/AIF360/pull/214) | Trusted-AI/AIF360 | Do "inequality indices" measure fairness or utility? |
-| [AIF360 #97](https://github.com/Trusted-AI/AIF360/issues/97) | Trusted-AI/AIF360 | Can a tool "remove bias"? Should we reconsider the word "bias"? |
+### The Problem
+A researcher using Fairlearn's `ExponentiatedGradient` mitigation approach found that repeated runs on the same data produced different fairness results — even after setting `random_state`. If a fairness intervention produces non-deterministic outcomes, how can we trust that a model is actually fair?
 
-To add a new debate: fork this repo, append to `DEBATES.md`, and open a PR!
+### The Investigation (community effort)
+The discussion, led by maintainers Roman Lutzu and Miro Dudik, traced the bug to how `sklearn.clone` interacts with custom estimator wrappers. `sklearn.clone()` only clones constructor keyword arguments — not dynamic attributes set inside `__init__`. The custom `CatBoostClassifierAdapter` wrapper had its model initialized in `__init__`, meaning `clone` couldn't capture the underlying model's random state. The fix: replace `clone` with `copy.deepcopy`.
+
+### Why This Matters for the Podcast
+This is a debate about **trust, transparency, and accountability in algorithmic fairness**. If the very tools we use to *measure* fairness are themselves unreliable, what does it mean when a company claims compliance with fairness constraints?
+
+### Discussion Questions
+1. Is non-determinism in fairness mitigation algorithms an acceptable cost of complexity, or a deal-breaker that undermines fairness claims?
+2. Companies often cite fairness metrics to regulators and the public. How much reproducibility do you think should be required before a fairness claim can be made?
+3. When a maintainer says "we tried hard to only use deterministic optimizers" but a bug in a third-party library breaks that guarantee — who is responsible?
+4. Does this bug disproportionately harm marginalized groups, who are the intended beneficiaries of fairness protections?
+
+---
+
+## 🔢 Debate 3: When Your Fairness Metric Doesn't Mean What the Docs Say It Means
+
+**Source:** [Trusted-AI/AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528)
+**Status:** Open
+**Key tension:** Mathematical accuracy vs. communicate-ability
+
+### The Problem
+A user noticed that AIF360's `average_odds_difference` metric is documented as "a value of 0 indicates equality of odds" — but mathematically, a value of 0 can occur in configurations where equalized odds is *not* satisfied. The same error appeared on IBM's own cloud documentation page.
+
+### Why This Matters for the Podcast
+This is about **the politics of mathematical communication**. When the official documentation of a fairness metric — used by thousands of practitioners and embedded in commercial products — contains a subtle error, what are the consequences?
+
+### Discussion Questions
+1. If a fairness metric can produce misleading results — not through malice but through imprecision — is the tool still "responsible AI"?
+2. Should there be mandatory independent audits of fairness metric implementations?
+3. When the same error appears in both open-source and commercial documentation, does that suggest a structural problem in how AI ethics tools are validated?
