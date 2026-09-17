@@ -4,7 +4,7 @@ A living document summarizing real controversies from open-source fairness toolk
 
 ---
 
-## 🔥 Debate #1: How Should Fairness Metrics Handle Non-Standard Data?
+## 🔥 Debate #1: How Should Fairness Metrics Handle Non-Standard Data? The MetricFrame API War
 
 **Source:** [fairlearn/fairlearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756)
 **Labels:** `API` | **Status:** Open (74 comments, no resolution)
@@ -167,6 +167,51 @@ This is not a quirky edge case. It cuts to the **core philosophical tension** in
 
 ---
 
+## 🔥 Debate #4: Empirical Differential Fairness — Should a Metric Return a Single Number or an Intersectional Breakdown?
+
+**Source:** [Trusted-AI/AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558)
+**Labels:** *(none)* | **Status:** Open (1 comment, actively discussed)
+**Date opened:** January 21, 2026 | **Last updated:** September 16, 2026
+
+### The Core Question
+
+The current implementation of the Empirical Differential Fairness (EDF) metric in AIF360 only returns a **single scalar value** summarizing fairness across all protected attributes. But for **intersectional analysis** — understanding how race *and* gender *and* disability compound — a single number is dangerously reductive. The question: **Should the metric return a breakdown of which attribute-group combinations drive the maximum log-ratio, or is a single scalar sufficient?**
+
+### The Two Positions
+
+#### 🟢 jetverbeek (issue author) — "A scalar hides intersectional harm"
+
+- Requested that the metric return: (a) the pair(s) of attribute groups producing the max log ratio, and (b) a breakdown of all/top X group combinations with their respective log-ratios.
+- **Underlying concern:** A single scalar can mask the fact that the worst-off intersectional group (e.g., Black disabled women) experiences dramatically different treatment than the overall population suggests. Fairness metrics that don't surface intersectional disparities are functionally useless for the communities most harmed by compounding bias.
+
+#### 🟢 Hanabi9248 (potential contributor) — "Keep the scalar, add a separate method"
+
+- Proposed keeping `smoothed_empirical_differential_fairness()` returning a scalar (for backward compatibility and overall summary) while adding a **separate method** for the group-pair breakdown.
+- The new method would use the same instance weights and Dirichlet smoothing as the existing metric, with tests for ties and multiple protected attributes.
+- Offered an alternative: an optional `details` argument on the existing method, rather than a separate function.
+- **Key quote:** *"Could you assign this to me? I would keep smoothed_empirical_differential_fairness() returning a scalar and add a separate method for the group-pair breakdown."*
+
+#### 🟢 romanlutz (maintainer) — "Consistency is non-negotiable"
+
+- While this commenter's primary focus was on the related issue #1725 (MetricFrame's missing-value handling), their underlying position is clear: **consistency between AIF360's metrics is paramount.** A split between what the scalar returns and what the breakdown returns would create the same kind of confusion that led to the Fairlearn #1725 bug.
+
+### Why This Debate Matters for Social Justice
+
+1. **Intersectionality isn't a feature — it's a necessity.** Kimberlé Crenshaw's intersectionality framework emerged precisely because single-axis analysis (race *or* gender) invisibilizes the compounded discrimination faced by people at the intersection of multiple marginalized identities. A fairness metric that returns only a scalar is structurally incapable of capturing this reality.
+
+2. **The scalar vs. breakdown choice is a political decision.** Choosing to return a single number is choosing simplicity over precision, aggregation over specificity. Who benefits from that choice? The communities most harmed by intersectional bias are the ones least likely to be visible in a single scalar.
+
+3. **Backward compatibility as a value称 — whose value?** The concern about changing the API assumes that existing users depend on the scalar return. But whose analysis depends on the scalar? If it's primarily companies seeking a "fairness certificate" to tick a compliance box, then backward compatibility serves the certificate-seekers, not the audited communities.
+
+### 🎙️ Podcast Talking Points
+
+1. **The politics of aggregation:** When a fairness metric returns a single number, what does it mean for the communities whose specific intersectional experience is averaged away? Is a "fairness score" of 0.85 meaningful if the worst-off group scores 0.30?
+2. **Who writes the metrics matters:** The EDF metric was proposed and is being extended by external contributors (jetverbeek, Hanabi9248), not IBM maintainers. Does this shift the political character of what gets measured? Or does it simply mean IBM's maintainers are indifferent to intersectionality?
+3. **The parallel with Fairlearn's MetricFrame debate:** Both debates center on whether a tool should serve expert analysts (who need granular breakdowns) or general users (who need simple summaries). Is this the same tension in both cases, or does the intersectional dimension add something new?
+4. **The "top X" compromise:** Hanabi9248's proposal to return a breakdown of the "top X" group combinations is practical but raises its own question: who chooses X? And what happens to group combinations ranked X+1 — are they invisible by design?
+
+---
+
 ## 📝 Contributing Debates
 
 Have you found another heated thread in a fairness repo? Add it here!
@@ -176,6 +221,8 @@ Have you found another heated thread in a fairness repo? Add it here!
 | [fairlearn #756](https://github.com/fairlearn/fairlearn/issues/756) | fairlearn/fairlearn | Should `MetricFrame` support metrics without `y_true`/`y_pred`? |
 | [AIF360 #214](https://github.com/Trusted-AI/AIF360/pull/214) | Trusted-AI/AIF360 | Do "inequality indices" measure fairness or utility? |
 | [fairlearn #1625](https://github.com/fairlearn/fairlearn/issues/1625) | fairlearn/fairlearn | Should fairness tools measure harm to non-human animals? |
+| [AIF360 #558](https://github.com/Trusted-AI/AIF360/issues/558) | Trusted-AI/AIF360 | Should EDF return a scalar or an intersectional breakdown? |
+| [fairlearn #1725](https://github.com/fairlearn/fairlearn/issues/1725) | fairlearn/fairlearn | Should MetricFrame and plot_roc_curve_by_group handle missing values consistently? |
 | [AIF360 #97](https://github.com/Trusted-AI/AIF360/issues/97) | Trusted-AI/AIF360 | Can a tool "remove bias"? Should we reconsider the word "bias"? |
 
 To add a new debate: fork this repo, append to `DEBATES.md`, and open a PR!
