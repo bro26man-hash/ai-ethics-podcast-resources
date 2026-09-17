@@ -58,7 +58,7 @@ The community eventually converged on a **compromise ("Alternative A")**:
 
 ## 🔥 Debate #2: What Do Fairness Metrics Actually Measure? The Utility-vs-Fairness War Inside AIF360
 
-**Source:** [Trusted-AI/AIF360 Issue #214](https://github.com/Trusted-AI/AIF360/pull/214) (and extended discussion in comments)
+**Source:** [Trusted-AI/AIF360 Issue #214](https://github.com/Trusted-AI/AIF360/issues/214) (and extended discussion in comments)
 **Labels:** `metrics` | **Status:** Open (9 comments, over 3 years)
 **Date opened:** November 2020 | **Last updated:** February 2023
 
@@ -191,7 +191,7 @@ But beneath the surface is a deep and unresolved question in algorithmic fairnes
 - **romanlutz** (maintainer of microsoft/PyRIT, Fairlearn contributor): *"Missing sensitive feature values should be rejected with a clear `ValueError` in both APIs, consistent with `MetricFrame` after #1698. We do not want the ROC helper to silently drop rows from group curves while retaining them in the overall curve."*
 - **LobsterQBA** (contributor): Proposed a focused fix to bring `plot_roc_curve_by_group` into the same contract as `MetricFrame` — reject missing values before plotting, with regression tests, consistent error wording, and updated docstrings.
 - **Underlying philosophy:** Silently dropping rows creates an apples-to-oranges comparison: the "Overall" curve includes data that the group curves excluded. This produces *misleading fairness audits* — the very thing the tool is supposed to prevent. Missing data on sensitive attributes is not noise; it is a signal about who was not measured, why, and what biases that exclusion introduces. A fairness tool that hides missing data is a fairness tool that hides bias.
-- **Key insight:** The choice to reject forces the auditor to ask *why* the data is missing. Missing sensitive attribute data often correlates with the very marginalization the tool is supposed to detect. If a lending audit has no data on a particular demographic group, that absence may itself be evidence of discriminatory data collection practices.
+- **Key insight:** The choice to reject forces the auditor to ask *why* the data is missing. Missing sensitive attributes often correlate with the very marginalization the tool is supposed to detect. If a lending audit has no data on a particular demographic group, that absence may itself be evidence of discriminatory data collection practices.
 
 #### 🔴 Position B: The Plotting Tool Should Keep Skipping — Pragmatism for Practitioners
 
@@ -212,69 +212,75 @@ A maintainer (`romanlutz`) has confirmed the direction: **reject missing values 
 ### 🎙️ Podcast Talking Points
 
 1. **The "convenience vs. conscience" trade-off:** When a fairness tool silently drops rows with missing sensitive attributes, it's arguably optimizing for *analyst convenience* over *audit integrity*. Whose convenience matters more — the data scientist running the audit, or the community whose data is missing and whose absence goes unacknowledged?
+
 2. **Missing data is not neutral:** In the criminal justice space, missing race data often correlates with over-policing of certain neighborhoods. In healthcare, missing demographic data often correlates with distrust of medical institutions among marginalized groups. When a fairness tool drops these rows, is it being "pragmatic" — or is it participating in the same erasure that the audit was supposed to detect?
+
 3. **The consistency argument cuts both ways:** Proponents of "reject in both APIs" argue for consistency. But consistency *around what?* If the consistent behavior is to reject, that's principled. If the consistent behavior is to skip, that's convenient. The choice of which consistent behavior to implement is itself a value judgment that the current debate never explicitly names.
+
 4. **Who gets to define "fairness" in tool design?** The decision to reject vs. skip was made by contributor-level maintainers, not by a community governance process. The people most affected by the choice — communities with missing data — had no input. Does this reflect a broader pattern in fairness tooling where design decisions are made by and for technologists, not by the communities impacted?
+
 5. **The documentary parallel:** There is a long history of official statistics *excluding* marginalized groups — from the U.S. Census's three-fifths compromise to the exclusion of LGBTQ+ questions. A fairness tool that silently drops missing demographic data is, in miniature, repeating the same pattern. The tool should be *highlighting* the absence, not hiding it. What would it look like if fairness tools treated missing data as a *finding* rather than an *inconvenience*?
 
 ---
 
-## 🔥 Debate #5: What Does a Fairness Metric's Documentation Actually Promise? The AIF360 `average_odds_difference` Controversy
+## 🔥 Debate #5: What Does "Average Odds Difference" Actually Measure? The Metric Misrepresentation Inside AIF360
 
 **Source:** [Trusted-AI/AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528)
-**Labels:** `metrics` | **Status:** Open (1 comment, active as of September 2026)
-**Date opened:** April 23, 2024 | **Last updated:** September 11, 2026
-👍 Reactions: 2
+**Labels:** `documentation` | **Status:** Open (1 comment, 2 🔑 reactions, no resolution)
+**Date opened:** April 23, 2024 | **Last updated:** September 11, 2026 (still open!)
 
 ### The Core Question
 
-IBM's AI Fairness 360 toolkit documents its `average_odds_difference` metric as follows: *"A value of 0 indicates equality of odds."* But contributor **AndreFCruz** demonstrated with a concrete mathematical proof and a visual diagram that this documentation is **fundamentally wrong**. He showed that there exist pairs of points where `average_odds_difference = 0` but the model does **not** satisfy equalized odds — meaning the metric can read "perfectly fair" while the model is demonstrably unfair by the equalized-odds standard.
+IBM's AIF360 toolkit — one of the most widely used fairness libraries in the world — documents its `average_odds_difference` metric as follows: *"A value of 0 indicates equality of odds."* Contributor **AndreFCruz** demonstrated that this documentation is **mathematically wrong**. He showed that you can construct datasets where `average_odds_difference = 0` while the model *violates* equalized odds in both the TPR and FPR dimensions simultaneously. The metric's documentation conflates a different fairness concept (average odds) with equalized odds, creating a false sense of assurance.
 
-The same错误also appears on IBM's public-facing documentation website, meaning that **policymakers, auditors, and company compliance teams relying on IBM's published fairness guidance are receiving mathematically incorrect information**.
+The issue includes a visual proof (an image showing a line of points where `average_odds_difference = 0` but neither TPR nor FPR differences are zero) and links to the same error on IBM's official website documentation.
 
-This is not a bug fix — it is a challenge to the **trustworthiness of the fairness tooling infrastructure itself**.
+But beneath the surface is a fundamental question: **When a fairness toolkit's core documentation mislabels a metric, what does that mean for the audits, certifications, and policy decisions built on top of it?**
 
-### The Two Positions
+### The Evidence
 
-#### 🟢 AndreFCruz — "The metric is misdocumented and misleading"
+#### 🟢 AndreFCruz — "The documentation is wrong and needs correction"
 
-- Provided a concrete four-row counterexample: `average_odds_difference = 0` while both `average_abs_odds_difference` and `equalized_odds_difference` = 1.
-- Uploaded a diagram visually demonstrating that the "average odds = 0" locus is a line, **not a point** — meaning infinitely many unfair configurations satisfy the metric's stated criterion.
-- Traced the same error to IBM's public-facing documentation website (aif360.res.ibm.com), extending the impact from the API docs to publicly accessible educational materials.
-- **Key insight:** If a fairness metric's documentation promises that "0 means fair" and that promise is mathematically false, then every auditor who uses this metric to certify that a model is "fair" is producing a **false certification**. The error isn't in the metric's formula — it's in the *interpretive bridge* between the metric's output and the fairness concept it's supposed to represent.
-- **Political implication:** Fairness metrics are used in high-stakes decisions — lending approvals, hiring, criminal sentencing, healthcare triage. A documentation error that causes a metric to *undercount* unfairness isn't an academic oversight; it's a tool that **systematically underreports harm** to the very communities it was designed to protect.
+- Demonstrated mathematically that `average_odds_difference = 0` does **not** imply equalized odds. Equalized odds requires *both* TPR difference = 0 *and* FPR difference = 0, but average odds difference is their *average* — which can be zero when one is positive and the other is negative, masking real disparities.
+- The error appears in both the **AIF360 Python API documentation** and IBM's **official website documentation**, meaning anyone relying on either source gets the wrong impression.
+- **Key quote (from issue body):** *"This mistake seems to be repeated on the IBM website."* — pointing to IBM's data platform documentation page where the same mislabeling appears.
+- Received 2 🔑 reactions from other community members who confirmed the issue.
+- **Underlying philosophy:** If a fairness metric is documented incorrectly, the toolkit is actively harmful — it produces false confidence in biased systems. Accuracy in documentation is not a cosmetic concern; it is a **justice concern**.
 
-#### 🟢 Hanabi9248 (maintainer) — "I have a focused correction"
+#### 🟡 Hanabi9248 — "I can fix this, but the deeper problem is systemic"
 
-- Responded to the issue with a direct offer: *"Could you assign this to me? The cancellation also appears in MetricTextExplainer and its JSON output. I have a focused correction for both API docstrings and the explanations, with a four-row example where average_odds_difference is 0 while average_abs_odds_difference and equalized_odds_difference are both 1. The metric formulas remain unchanged."*
-- The proposed fix is surgical: correct the **docstrings** and the **explanatory text**, not the metric's mathematics. The metric's formula is left unchanged — the fix is about what the metric's output *means*, not how it's computed.
-- Underlying philosophy: The maintainer acknowledges the documentation error and is willing to fix it, but the fix is limited to textual corrections. The deeper question — **why did this error exist for months (the issue was opened in 2024) in a toolkit used by real auditors?** — goes unaddressed.
+- Commented to take ownership of the fix: *"Could you assign this to me? The cancellation also appears in MetricTextExplainer and its JSON output. I have a focused correction for both API docstrings and the explanations, with a four-row example where average_odds_difference is 0 while average_abs_odds_difference and equalized_odds_difference are both 1. The metric formulas remain unchanged."*
+- This reveals that the error propagates beyond just the metric definition — it also appears in the **explanation modules** that generate natural-language interpretations of fairness results, meaning an auditor using the explainer would receive a *textual* confirmation of the false claim.
+- **Key insight:** The fix is technically simple (correct the docstrings and explanations, provide a counterexample). But the fact that this error existed for **over two years** (opened April 2024, still open September 2026) in one of the most cited fairness toolkits raises questions about maintenance priorities and review processes.
+- **Underlying philosophy:** The fix is easy; the systemic problem is that nobody caught it. This suggests a gap between the people who *write* fairness metrics and the people who *verify* that their documentation is correct — and those people may not be the same.
+
+#### 🔴 The Implicit Position — "This is a docs issue, not a fairness issue"
+
+- No AIF360 maintainer has publicly weighed in on the mathematical substance of the issue. The issue has 2 reactions but no maintainer comments, no labels beyond the generic `documentation` tag, and no milestone.
+- The metric formulas in the code may or may not be correct — the issue focuses on the *documentation*, not the implementation. But if the formulas are correct and only the docstrings are wrong, the toolkit's programmatic output would still be *technically* accurate; only the human-readable descriptions are misleading.
+- **What this silence means:** In a toolkit used by auditors, regulators, and policymakers, the *documentation is the interface*. If the docs are wrong, the user's interpretation is wrong — regardless of whether the underlying computation is correct. Treating this as "just a docs issue" is like calling a mislabeled medicine label "just a labeling issue."
 
 ### Why This Debate Matters for Social Justice
 
-This is the most "mundane" but potentially most damaging debate in this collection. It's not about philosophy, scope, or politics — it's about **a documentation error in a fairness metric that the toolkit itself describes as indicating equality of odds when it demonstrably does not**.
+1. **False certification of biased systems.** If an auditor uses AIF360's `average_odds_difference` and gets a value of 0, they may believe the model satisfies equalized odds — the gold standard for non-discriminatory classification. But as AndreFCruz shows, the model could have *massive* TPR and FPR disparities that cancel each other out in the average. A hiring algorithm could be systematically rejecting qualified women (TPR gap) while systematically flagging innocent Black applicants (FPR gap), and the average could read as "fair." The communities harmed by each *individual* disparity never see their harm acknowledged because the average masks it.
 
-1. **False certification of biased systems.** If an auditor uses `average_odds_difference = 0` as evidence that a lending model satisfies equalized odds, and the model actually doesn't, the auditor has **certified a biased system as fair**. The documentation error doesn't just mislead — it *underreports* unfairness. This is the opposite of what a fairness tool is supposed to do.
+2. **Documentation is a form of power.** Who writes the documentation for a fairness toolkit decides what its users *think* the tool measures. IBM wrote the docs. IBM defines "average odds." IBM decides that "0 = equality of odds," even though that's mathematically false. When a community auditor reads that documentation, they are trusting IBM's framing of what fairness means — not their own community's understanding of justice.
 
-2. **Trust in the entire fairness infrastructure.** When a foundational toolkit like AIF360 has a documentation error that went uncorrected for over a year (April 2024 to September 2026, and still open), it raises questions about **who is reviewing fairness tooling before it ships to the world**. If this error slipped through, what other errors remain? Do corporate users of the toolkit have any independent verification process?
+3. **The two-year silence.** This issue was opened in April 2024. It still has no maintainer response as of September 2026 — over two years. During those two years, how many audits relied on the mislabeled metric? How many systems were certified "fair" based on a number whose meaning was documented incorrectly? The silence is not neutral; it is a choice, and that choice has consequences.
 
-3. **The gap between math and meaning.** This debate is a microcosm of the larger tension in algorithmic fairness: the mathematical formula (the metric computation) and the interpretive framework (what the metric's output means for fairness) are **separate intellectual tasks**, often performed by different people. AIF360's documentation conflated them — writing the interpretation first and then shelving it against the formula without verifying the match. This is a software engineering pattern (specification vs. implementation drift) but with **civil rights consequences**.
-
-4. **Whose documentation matters?** The fix was offered by a maintainer, but the issue was opened by an external contributor. The maintainer's response was prompt and constructive — but the fact that this error survived for 28 months in the documentation of a toolkit with 2,866 stars raises the question: **in the fairness tooling ecosystem, who is responsible for catching these errors before they reach the communities that depend on them?** The contributors? The corporate sponsor (IBM)? The users?
-
-5. **The "it's just documentation" deflection.** Hanabi9248's framing — "the metric formulas remain unchanged" — is technically correct but philosophically incomplete. The documentation *is* the product for many users. An auditor who reads the AIF360 docs and acts on them is using the documentation as their fairness standard. If the documentation is wrong, the "metric" — in the full sense of what the user understands the metric to mean — is wrong, regardless of whether the formula is correct.
+4. **The propagation problem.** Hanabi9248's comment reveals that the same error appears in `MetricTextExplainer` — the tool that generates *plain-language explanations* of fairness results. This means the error isn't just in a docstring; it's in the *narrative* the toolkit constructs about a model's fairness. An auditor who relies on the explainer doesn't just see a number — they read a sentence that says "this model satisfies equalized odds" when it doesn't. The explainer turns a documentation error into a *testimonial* error.
 
 ### 🎙️ Podcast Talking Points
 
-1. **The "it's just docs" myth:** Calling a documentation error "just" documentation ignores that documentation *is* the interface between fairness research and real-world deployment. When the docs say "0 = fair," that's the sentence an auditor reads before stamping a model as "compliant." Documentation is not a side note — it's the delivery mechanism.
+1. **"0 = fair" is not always fair.** The `average_odds_difference` metric can read 0 when a model is *unequal* in TPR and FPR simultaneously. What does this mean for audits that certify systems as "fair" based on this metric? Who is harmed when "fair" is a mathematical artifact rather than a substantive claim?
 
-2. **How long is too long?** This issue has been open for 28 months. The maintainer responded with a fix offer within a day of someone marking it as a problem. But before that, it sat there. What's the acceptable response time for a fairness-tool documentation error? Should there be a faster review process?
+2. **Documentation is not a side issue.** AIF360 maintainers have not weighed in on a two-year-old issue about incorrect documentation in their flagship metric. What does it mean that the fairness community prioritizes code over documentation? Is documentation "just" a packaging concern, or is it the primary interface between a fairness tool and the people whose lives depend on its accuracy?
 
-3. **The formula vs. meaning gap:** This debate is a case study in how even well-intentioned fairness toolkits can produce misleading results when the *interpretation* of a metric drifts from its mathematical definition. It's a bug in the *semantics* of the metric, not the syntax. How many other "semantic bugs" exist in fairness tooling — cases where the formula works but the interpretation is wrong?
+3. **The explainer makes it worse.** The error doesn't just sit in a docstring — it propagates into `MetricTextExplainer`, which generates natural-language fairness reports. An auditor reading "this model satisfies equalized odds" is receiving a *claim* from the tool, not just a number. Who is responsible when the tool's claim is false?
 
-4. **Who catches these errors?** The error was found by an external contributor (AndreFCruz), not by IBM's own QA or documentation team. This raises an uncomfortable question: **are open-source fairness toolkits maintained primarily by their corporate sponsors, or by the community?** When the community catches an error that the sponsor missed, whose responsibility was it to find it first?
+4. **Whose documentation?** IBM wrote the AIF360 documentation. IBM defines what "average odds" means. When an auditor in a community organization reads those docs, whose definition of fairness are they internalizing? Does the fact that a corporate entity defines the language of fairness for a decades-old social justice concept raise governance questions that the fairness community has not addressed?
 
-5. **The乌家 of false fairness:** This is the most consequential insight: a documentation error that makes a fairness metric *underreport* unfairness isn't just misleading — it's **actively harmful**. It gives biased systems a "Fair" stamp they don't deserve. In other domains, this would be called fraud. In AI fairness, it's called a "documentation issue."
+5. **The two-year gap as a structural feature.** This issue has been open for over two years with no maintainer response. Is this an oversight, or is it a structural feature of how corporate-sponsored open-source fairness tools are maintained? When a toolkit is maintained by a corporate research lab (IBM Research), whose incentives determine what gets fixed — what gets fixed vs. what gets shipped?
 
 ---
 
@@ -288,7 +294,7 @@ Have you found another heated thread in a fairness repo? Add it here!
 | [AIF360 #214](https://github.com/Trusted-AI/AIF360/issues/214) | Trusted-AI/AIF360 | Do "inequality indices" measure fairness or utility? |
 | [fairlearn #1625](https://github.com/fairlearn/fairlearn/issues/1625) | fairlearn/fairlearn | Should fairness tools measure harm to non-human animals? |
 | [fairlearn #1725](https://github.com/fairlearn/fairlearn/issues/1725) | fairlearn/fairlearn | Should fairness tools reject or silently drop rows with missing sensitive feature values? |
-| [AIF360 #528](https://github.com/Trusted-AI/AIF360/issues/528) | Trusted-AI/AIF360 | Does `average_odds_difference` documentation correctly represent equalized odds? |
+| [AIF360 #528](https://github.com/Trusted-AI/AIF360/issues/528) | Trusted-AI/AIF360 | Does "average_odds_difference = 0" actually mean equalized odds? |
 | [AIF360 #97](https://github.com/Trusted-AI/AIF360/issues/97) | Trusted-AI/AIF360 | Can a tool "remove bias"? Should we reconsider the word "bias"? |
 
 To add a new debate: fork this repo, append to `DEBATES.md`, and open a PR!
