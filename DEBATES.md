@@ -1,163 +1,138 @@
-# ⚔️ Active Debates in the Fairness Community
+# ⚖️ Ongoing Debates in Algorithmic Fairness
 
-This page documents **real, unresolved controversies** from GitHub issue threads in major fairness toolkits. These aren't academic thought experiments — they represent disagreements among the people who build and maintain the tools that shape how society measures and enforces fairness in algorithmic systems.
-
----
-
-## 🔥 Featured Debate #1: What Does "Average Odds Difference = 0" Actually Mean?
-
-**Source**: [Trusted-AI/AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528)
-**Topic**: Whether the `average_odds_difference` metric is correctly documented as an "equalized odds relaxation"
-**Started**: April 23, 2024 | **Status**: Still open | **Reactions**: 👍 2
-
-### The Core Question
-
-The AIF360 documentation states:
-
-> *"A value of 0 indicates equality of odds."*
-
-But contributor **AndreFCruz** argues this is mathematically wrong. They demonstrate that there exist pairs of points where `average_odds_difference = 0` **but equalized odds do NOT hold**. The error, they claim, isn't just in the code — it's propagated to IBM's official documentation and to the `MetricTextExplainer` API output, meaning **practitioners worldwide may be misreading their fairness reports**.
-
-### Why This Debate Matters
-
-This isn't pedantry. The definition of "average odds difference" shapes what practitioners conclude about their models. If the metric underestimates bias (showing 0 when bias still exists), then:
-
-1. **Organizations deploy models they believe are fair but aren't.** A lending model that appears to satisfy equalized odds may actually be systematically disadvantaging a protected group on true positive rate.
-
-2. **The fairness "Industry standard" is built on a potentially flawed foundation.** AIF360's metrics are cited in academic papers, used in compliance audits, and referenced in regulatory submissions. A definitional error doesn't just stay in the repo — it flows into the broader ecosystem.
-
-3. **It raises the question: who guards the guards?** When a single company (IBM) controls both the toolkit and the documentation, and an external contributor has to flag the problem, what institutional safeguards exist for catching these errors? The issue has been open for over 2 years with no maintainer response.
-
-### The Positions
-
-| Position | Argument |
-|----------|----------|
-| **"It's a bug"** | The docstring is wrong; the formula doesn't correspond to equalized odds. This has been cited as fact in IBM's public documentation, creating a systemic mischaracterization. Fix the formula and the docs. |
-| **"It's a naming problem"** | The `average_odds_difference` metric isn't the same as `average_abs_odds_difference` — it's a different, looser measure. The fix isn't to change the formula but to clarify the documentation so practitioners understand what each metric actually measures. |
-| **"The real problem is that fairness metrics are practiced without philosophical rigor"** | This error is a symptom of a deeper issue: fairness metrics are often defined by convenience rather than by philosophical coherence. The field lacks a rigorous formal foundation — and when practitioners adopt these metrics without understanding the theory, errors propagate silently. |
-
-### What's Happened So Far
-
-- **AndreFCruz** (the reporter) provided a visual proof (embedded image in the issue) showing that points on a certain line have `average_odds_difference = 0` while `equalized_odds_difference = 1`.
-- **Hanabi9248** (a community contributor) offered to fix both the code docstrings and the `MetricTextExplainer` output, with a four-row example demonstrating the discrepancy. They proposed keeping the formula unchanged and correcting the documentation instead.
-- The issue remains **open with no maintainer response** — over 2 years since creation. This absence of maintainer engagement is itself a data point for the podcast: **what does it mean when the institutions behind fairness tools don't respond to cited errors?**
-
-### Discussion Questions for the Episode
-
-1. Is it better to fix the formula or fix the documentation? What are the trade-offs?
-2. How many other fairness metrics in widely-used toolkits have similar definitional ambiguities?
-3. Should there be an independent, third-party review of fairness metric definitions — similar to how math papers are peer-reviewed?
-4. Who should be responsible when a fairness tool's documentation is wrong? The developers? The company? The open-source community?
+A curated summary of real controversies happening in open-source fairness projects — sourced from GitHub issue threads, explainer corrections, and reproduced-bug reports.
 
 ---
 
-## 🔥 Featured Debate #2: Should a Fairness Toolkit Try to Do Everything? (The MetricFrame War)
+## Debate 1: The SHAP Measurement Problem — Does the Denominator Change the Story?
 
-**Source**: [fairlearn/fairlearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756)
-**Topic**: Should `MetricFrame` support metrics that don't require `y_true` and `y_pred`?
-**Started**: Open (74 comments, still active as of September 2025)
-**Labels**: API
+**Source:** [Fair-Code Issue #672](https://github.com/yakew7/Fair-Code/issues/672)  
+**Project:** [Fair-Code](https://github.com/yakew7/Fair-Code)  
+**Tags:** `documentation`, `good first issue`  
+**Status:** Open, unresolved
 
-### The Core Question
+### The Question
 
-Fairlearn's `MetricFrame` class currently only works with metrics that follow the scikit-learn signature `metric(y_true, y_pred)`. But there are many fairness-relevant metrics that don't fit this pattern:
+When auditing racial bias in a COMPAS recidivism model using SHAP values, how should you report race's influence? The answer depends on a choice that isn't mentioned in the original write-up:
 
-- **Dataset-only metrics** (e.g., demographic parity, statistical parity difference) that just need `y_true`
-- **Prediction-only metrics** (e.g., selection rate, false positive rate) that just need `y_pred`
-- **Non-classification metrics** (e.g., contextual bandit rewards, cost-sensitive losses) that need completely different parameters like `actions`, `rewards`, `propensities`
+- **Option A — Top-5 features denominator:** Race accounts for 0.1066 / (0.1066 + 0.0624 + 0.0234 + 0.0165 + 0.0126) = **48.1%** of the top-5 features' combined influence
+- **Option B — All-features denominator:** Race accounts for 0.1066 / 0.2523 = **42.3%** of all features' combined influence (rounds to "roughly 40%")
 
-The issue is whether to **remodel `MetricFrame` to support all of these** or **keep it simple and build separate tools for each problem type**.
+Both numbers are correct. They answer different questions.
 
-### The Two Positions
+### Why It Matters
 
-#### 🔵 Position A: Expand MetricFrame (MiroDudik, Fairlearn maintainer)
+The choice of denominator is a rhetorical decision disguised as a number. "Race drives 48% of the model's decisions" sounds more alarming than "race drives 42% of the model's decisions" — but the difference isn't about the model. It's about what you want the audience to feel.
 
-MiroDudik argues that `MetricFrame` should be made more flexible:
+In a courtroom, a prosecutor would cite 48%. A defense attorney would cite 42%. A journalist would pick whichever fits the headline.
 
-1. **Make `y_true` and `y_pred` optional** (default to `None`) so metrics that don't need them can still be used
-2. **Rename `metric` → `metrics`** for consistency with pandas and other arguments
-3. **Add `sample_params`** as a way to pass extra arguments to metrics that need them
+### The Deep Problem
 
-His reasoning:
-- The current API is *"really limiting us"* and would require explaining "all kinds of workarounds" in the documentation
-- Real use cases exist *outside* classification/regression: dataset-only metrics, streaming metrics, contextual bandits in lending, cost-sensitive learning
-- A backward-compatible transition path exists (deprecation warnings first, then keyword-only args)
+This isn't just about SHAP. It's about **who gets to decide what number tells the story of bias** — and whether there's a "correct" denominator or whether every choice embeds a value judgment about what counts as "influence."
 
-> *"I think that our current API is really limiting us, so I'd rather fix this sooner rather than commit to the future of docs that describe all kinds of workarounds."* — MiroDudik
-
-#### 🟠 Position B: Keep MetricFrame Simple; Build Separate Tools (riedgar-ms, Fairlearn maintainer)
-
-riedgar-ms argues that expanding `MetricFrame` is the wrong approach:
-
-1. **`**kwargs` is dangerous** — it makes it impossible to ever add new named parameters without breaking someone
-2. **Making `y_true`/`y_pred` optional opens "new failure modes"** that may not be user-friendly
-3. **Different problem types need fundamentally different APIs** — subclassing or separate classes (e.g., `SupervisedMetricFrame`, `ReinforcementMetricFrame`) would be cleaner
-
-His core principle:
-
-> *"I think that MetricFrame does the fairly simple task of taking an sklearn-style (y_true, y_pred) metric, and turning it into one with grouping (via the sensitive factors). I'd prefer to keep it that way, and work out the best API for a new use case from a clean sheet."* — riedgar-ms
-
-#### 🟢 Other Voices in the Thread
-
-- **hildeweerts**: *"I am afraid that trying to fit all different kinds of learning tasks into one MetricFrame will become extremely confusing for novice users."* — Worried about the learning curve for new users.
-- **romanlutz**: Asked for concrete examples before being convinced — *"I currently struggle to see the benefit of complicating the currently very intuitive API."*
-- **MiroDudik** countered with 4 detailed scenarios showing exactly how the flexible API would work in practice (classification + AUC in one frame, multi-model comparison, streaming metrics, contextual bandits).
-
-### Why This Matters for the Podcast
-
-This debate is not really about Python API design. It's about **who fairness tools are built for** and **what "fairness" means in practice**:
-
-1. **The novices vs. experts tension**: If you make the tool flexible enough for advanced researchers (contextual bandits, streaming metrics), do you alienate the practitioners and community advocates who need something simple and predictable?
-
-2. **The "one size fits all" problem**: Is it possible (or desirable) to have a single fairness metric framework that works for hiring, lending, criminal justice, and recommendation systems? Or does each domain require its own approach — and its own community involvement?
-
-3. **The backwards-compatibility trap**: Fairlearn's history shows that API changes can cause real harm (the gap between v0.4.6 and v0.5.0 left repo code incompatible with PyPI). This isn't just theoretical — it affects who can actually use the tool.
-
-4. **The measurement question itself**: The debate assumes that the *same kind of disaggregation* (grouping by sensitive features and comparing rates/errors) applies across all these domains. But is measuring "demographic parity in hiring" the same kind of problem as measuring "inverse propensity sampling in contextual bandits"? The answer to that question determines whether one tool should serve both.
+**Discussion prompts for the episode:**
+- Is there a "correct" way to aggregate feature importance for fairness reporting?
+- Should fairness audits standardize denominator conventions (like p-value thresholds)?
+- Does the choice of denominator change policy outcomes — and if so, who should make that choice?
 
 ---
 
-## 🔥 Featured Debate #3: Intersectionality vs. Single-Axis Fairness
+## Debate 2: The Counterfactual Fairness Reversal — When the Reproduction Contradicts the Argument
 
-**Source**: [Trusted-AI/AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558)
-**Topic**: Extending the Empirical Differential Fairness (EDF) metric for intersectional analysis
-**Started**: January 21, 2026 | **Status**: Still open
+**Source:** [Fair-Code Issue #654](https://github.com/yakew7/Fair-Code/issues/654)  
+**Project:** [Fair-Code](https://github.com/yakew7/Fair-Code)  
+**Tags:** `bug`, `documentation`  
+**Status:** Open, unresolved
 
-### The Core Question
+### The Claim
 
-The current EDF metric returns a **single scalar** summarizing fairness across all protected attribute values. But contributor **jetverbeek** argues this is inadequate for intersectional analysis — you can't tell *which* combination of attribute groups is driving the maximum log-ratio. The request: extend the metric to return the top group-pair combinations and their individual log-ratios.
+The [Counterfactual Fairness explainer](https://github.com/yakew7/Fair-Code/blob/main/explainers/counterfactual-fairness.md) presents a synthetic lending audit where:
 
-### Why This Debate Matters
+- 35.7% of applicants would get a different loan decision if they had been born into the other racial group
+- White applicants flip at 24.4%, Black applicants flip at 52.0%
+- The rhetorical point: *"this is the operational signature of race-based decisions — Black defendants flip much more often than White ones"*
 
-This exposes a fundamental tension in fairness tooling:
+### The Reality
 
-- **Single-axis fairness** (e.g., "Is the model fair to Black candidates?") is simple to measure but can hide disparities within subgroups. A model might be fair overall for "Black people" but severely unfair for Black women or Black disabled people.
-- **Intersectional fairness** requires more granular metrics, but these are harder to compute, harder to interpret, and harder to communicate to non-technical stakeholders.
+When the author reproduced the exact code (same seed, same model, same pipeline):
 
-Community contributor **Hanabi9248** offered a technical solution (keep the scalar method, add a separate breakdown method), but the fundamental design question remains: **should fairness tools default to intersectional analysis, or should that be opt-in?**
+- Violation rate: **31.5%**, not 35.7%
+- White applicants flip at **32.1%**, Black applicants flip at **30.6%**
+- The groups flip at **nearly identical rates** — not the dramatic 52% vs 24.4% disparity the article claims
 
-### Discussion Questions
+### Why It's a Real Debate, Not Just a Bug
 
-1. Should fairness metrics default to intersectional analysis, or is that premature? Who decides?
-2. If a tool only reports single-axis metrics, is it ethically negligent for not flagging potential intersectional harms?
-3. How do you communicate intersectional fairness results to a hiring committee or a board of directors?
+This isn't a typo. It's a **structural problem in how counterfactual fairness audits are written**:
 
----
+1. **The narrative preceded the evidence.** The article's argument — "race-based decisions harm Black applicants more" — was written first. The code was assembled to illustrate it. When the code produced a different result, the article kept its rhetorical framing and the issue got filed as a "bug."
 
-## 📋 Debate Tracking Template
+2. **Simulation variance vs. rhetorical conviction.** The author labels the discrepancy as a numeric error, but the deeper issue is: **who gets to write the narrative of algorithmic harm?** The person who runs the audit, or the person who writes the explainer?
 
-For future debates, maintain this structure:
+3. **The general lesson.** If a fairness explainer can get its headline numbers wrong while being "technically reproducible," what does that mean for the thousands of blog posts, conference talks, and policy briefs that cite fairness statistics without reproduction checks?
 
-| Field | Value |
-|-------|-------|
-| **Issue link** | URL |
-| **Toolkit** | AIF360 / Fairlearn / Aequitas / other |
-| **Topic** | One-line summary |
-| **Core tension** | What fundamental question is at stake? |
-| **Positions** | At least 2, fairly represented |
-| **Maintainer response** | Yes / No / Partial — and what that says about institutional accountability |
-| **Podcast angle** | What makes this compelling for a general audience? |
+**Discussion prompts for the episode:**
+- Should fairness explainers be required to include reproduction code and output blocks?
+- Is there a difference between a "conceptual illustration" and a "reproducible audit" — and should one be labeled as the other?
+- When a reproduction contradicts the original claim, who gets to tell the corrected story?
 
 ---
 
-*Debates are extracted directly from GitHub issue threads. We strive to represent all positions fairly. To suggest a debate for inclusion, [open an issue](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues/new).*
+## Debate 3: The Impossibility Triangle — Which Fairness Metric Wins?
+
+**Source:** [Fair-Code Explainer: Why Fairness Metrics Conflict](https://github.com/yakew7/Fair-Code/blob/main/explainers/fairness-metric-conflicts.md) + [Issue #665](https://github.com/yakew7/Fair-Code/issues/665)  
+**Project:** [Fair-Code](https://github.com/yakew7/Fair-Code)  
+**Tags:** `documentation`, `bug` (issues filing corrections to the explainer's COMPAS numbers)  
+**Status:** Ongoing — the explainer is widely cited, itsnumeric examples are contested
+
+### The Theorem
+
+Chouldechova (2017) and Kleinberg et al. (2016) independently proved: **when base rates differ between groups, you cannot simultaneously satisfy equalized odds and predictive parity** — except in trivial edge cases.
+
+This isn't a modeling flaw. It's an identity that follows from the definitions.
+
+### The Real-World Battle
+
+The COMPAS case is the canonical illustration:
+
+| Who | Metric Used | Finding |
+|---|---|---|
+| **ProPublica** | Equalized Odds (FPR parity) | Black defendants falsely flagged at 78.1% vs White at 0.3% — *unfair!* |
+| **Northpointe** | Predictive Parity (PPV parity) | PPV 62.8% vs 50.0% — *closer than the error-rate gap, tool is not biased!* |
+
+Both were mathematically correct. They were measuring different things.
+
+But the Fair-Code repo's own issues (#665, #671) reveal that even the **numbers used to illustrate this famous case** don't always match what the repo's own code produces — raising the question: if the textbook example has contested numerics, how solid is the consensus on which metric to use?
+
+### The Deeper Question
+
+Choosing a fairness metric is not a technical decision — it's an **ethical and political** one:
+
+| Metric | Prioritizes | Who bears the cost when it fails |
+|---|---|---|
+| Demographic Parity | Equal access to outcomes | Groups with higher true rates may be under-predicted |
+| Equalized Odds | Equal error rates | Accuracy per group may be sacrificed |
+| Predictive Parity | Equal prediction reliability | Groups with lower base rates face higher false positive rates |
+
+**Who decides which metric a court uses? Who picks the one that regulators enforce? Who bears the cost when the wrong one is chosen?**
+
+**Discussion prompts for the episode:**
+- Should there be a "default" fairness metric for high-stakes domains — and who should set it?
+- Is the impossibility theorem an argument against fairness metrics altogether?
+- If you can't satisfy all metrics, whose rights should the metric protect?
+
+---
+
+## How to Contribute a Debate
+
+Found a great fairness controversy in an open-source issue thread? Contribute:
+
+1. Link the issue/PR
+2. Summarize the two (or more) sides
+3. Explain *why* the debate matters beyond the repo
+4. Add discussion prompts for our listeners
+
+Format: follow the structure above — **The Question → Why It Matters → Discussion Prompts**
+
+---
+
+*Debates are sourced from real GitHub issue threads. The summary represents the maintainer's perspective; listener and contributor counterarguments are welcome — open an issue or submit a PR.*

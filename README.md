@@ -1,60 +1,62 @@
-# 🤖⚖️ AI Ethics & Social Justice Podcast — Resource Hub
+# 🎙️ AI Ethics & Social Justice — Podcast Resource Hub
 
-**A crowdsourced hub** for the *AI Ethics & Social Justice Podcast* — curating open-source fairness tools, unresolved debates, and community discussion on algorithmic bias, fairness metrics, and responsible AI.
+A **crowdsourced hub** for the *AI Ethics & Social Justice* podcast — curating open-source tools, live debates, and community resources on algorithmic fairness, bias auditing, and the ethics of automated decision-making.
 
-## 🎙️ About This Project
+## 🎯 What This Is
 
-This repository is the companion hub for our podcast episode on **technology and social justice in the AI era**. We excavate real, ongoing debates from the open-source fairness community on GitHub and bring them into public conversation. Our goal: make the sociotechnical tensions embedded in fairness tooling visible — and invite listeners, practitioners, researchers, and affected communities to weigh in.
+This repo is a living research companion for our podcast episodes. We track:
 
-### What You'll Find Here
+- **Active open-source projects** building fairness toolkits, bias auditors, and governance platforms
+- **Real debates happening in those projects** — disagreements over how to measure fairness, who tools should serve, and what "fair" even means
+- **Community discussion** — pull requests, issues, and explainers that surface the tensions between technical rigor and social justice
 
-| File | Purpose |
-|------|---------|
-| **[RESOURCES.md](RESOURCES.md)** | Curated list of active open-source fairness & bias-auditing projects, with descriptions and why they matter |
-| **[DEBATES.md](DEBATES.md)** | Real GitHub issue threads that surfaced genuine disagreements — extracted and contextualized for podcast discussion |
-| **[Issues](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues)** | Community discussion prompts based on those debates — reply, share your perspective, propose new topics |
+## 📂 Repository Structure
 
----
+```
+ai-ethics-podcast-resources/
+├── RESOURCES.md    # Curated links to open-source fairness projects
+├── DEBATES.md      # Summaries of ongoing controversies from issue threads
+├── README.md       # This file
+```
 
-## 🔍 Featured Projects
+## 🔍 What You'll Find
 
-| Project | Stars | Description |
-|---------|-------|-------------|
-| **[Fairlearn](https://github.com/fairlearn/fairlearn)** | 2,284 | Microsoft-backed toolkit for fairness assessment & mitigation; explicitly frames fairness as a sociotechnical challenge |
-| **[AIF360](https://github.com/Trusted-AI/AIF360)** | 2,862 | IBM's comprehensive bias-detection & mitigation toolkit with 70+ fairness metrics and 15+ debiasing algorithms |
-| **[Responsibly](https://github.com/ResponsiblyAI/responsibly)** | 100 | Python-first auditing toolkit aligned with *Fairness and Machine Learning* (Barocas, Hardt & Narayanan); includes word-embedded bias metrics |
-| **[LiFT](https://github.com/linkedin/LiFT)** | 173 | LinkedIn's Scala/Spark toolkit for measuring fairness at web scale with permutation testing |
-| **[Aequitas](https://github.com/dssg/aequitas)** | 772 | University of Chicago toolkit for confusion-matrix-based fairness auditing with interactive API |
+### Active Fairness Toolkits
+We track 2–3 active open-source projects per episode, spanning:
+- **Bias auditing pipelines** — end-to-end fairness audits on real datasets (COMPAS, hiring, lending, healthcare)
+- **Fairness metric libraries** — implementations of demographic parity, equalized odds, predictive parity, counterfactual fairness
+- **Governance & compliance platforms** — evidence-grade AI assurance for regulatory frameworks (EU AI Act, NIST AI RMF)
 
----
+### Live Debates
+Each episode zooms in on a **specific ongoing disagreement** from an open issue thread:
+- How should we measure the influence of race in a model? (SHAP-based vs. causal approaches)
+- Which fairness metric should dominate when they conflict? (Demographic parity vs. equalized odds vs. predictive parity)
+- Who bears the cost of a "fair" model — and who decides?
+- Can counterfactual fairness ever be computed without a contested causal graph?
 
-## ✊ Get Involved
+## 🤝 How to Contribute
 
-- **Raise a new debate** — Found a controversial fairness issue thread on GitHub? [Open an issue](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues/new) with the link and your take.
-- **Add a project** — Know an open-source fairness tool we missed? [Send a PR](https://github.com/bro26man-hash/ai-ethics-podcast-resources/pulls) or file an issue.
-- **Join the discussion** — Replying to any [existing issue](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues) counts as a contribution. Your lived experience, technical expertise, or policy perspective shapes this hub.
-- **Flag errors** — If a project description is outdated or a debate was summarized inaccurately, let us know.
+We welcome contributions from everyone — podcasters, engineers, ethicists, and the just-curious:
 
----
+1. **Found a great fairness toolkit?** Add it to `RESOURCES.md`
+2. **Spotted a real debate in an issue thread?** Summarize it in `DEBATES.md`
+3. **Want to discuss an episode topic?** Open an issue with the `discussion` label
+4. **Have a counterargument?** Open a PR — fairness debates thrive on disagreement
 
-## 📋 Contributing Guide
+## 📌 Featured Debate (See `DEBATES.md`)
 
-1. Fork the repo
-2. Add your contribution (project entry, debate summary, discussion comment)
-3. Open a PR with a clear description of what you added and why
-4. Maintainers will review within 1 week and merge if it meets our editorial standards
+Each episode centers on a **real, unresolved controversy** from the open-source community. Current featured debates include:
 
-### Editorial Standards
-- Fairness tools must have active maintenance (updated within the last 12 months) and a clear open-source license
-- Debate summaries must fairly represent all positions expressed in the source thread
-- We prioritize projects and debates that center the perspectives of **communities most affected by algorithmic harm**, not just technologists and policymakers
+- **The SHAP Measurement Problem** — When auditing racial bias via SHAP values, does the denominator (top-5 features vs. all features) change the story? ([GitHub Issue #672](https://github.com/yakew7/Fair-Code/issues/672))
+- **The Counterfactual Fairness Reversal** — A synthetic lending audit's claimed racial disparity flips direction when actually reproduced. What does it mean when the "expected" outcome contradicts the real one? ([GitHub Issue #654](https://github.com/yakew7/Fair-Code/issues/654))
+- **The Impossibility Triangle** — Demographic parity, equalized odds, and predictive parity cannot all hold simultaneously. Which one should you pick, and who decides? ([Fair-Code Explainer](https://github.com/yakew7/Fair-Code/blob/main/explainers/fairness-metric-conflicts.md))
 
----
+## 📬 Feedback & Discussion
 
-## 🏛️ Governance
+- **Episode suggestions** — Open an issue with label `episode-suggestion`
+- **Debate nominations** — Found a great fairness thread? Open an issue with label `debate-nomination`
+- **General discussion** — Open any issue, tag it `discussion`
 
-This is a community-maintained resource. Decisions about what to include are made through public issue discussion. If you disagree with a listing or summary, you have every right to challenge it — that's the whole point.
+## 📜 License
 
----
-
-*Built for the AI Ethics & Social Justice Podcast. Listening, learning, and acting together.*
+This resource hub is released under the [MIT License](LICENSE). Individual project links remain the property of their respective authors.
