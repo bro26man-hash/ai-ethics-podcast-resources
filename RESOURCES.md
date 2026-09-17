@@ -1,81 +1,64 @@
-# 📚 Open-Source Fairness & Bias-Auditing Projects
+# 📂 Open-Source Fairness & Bias-Auditing Projects
 
-A curated collection of active, well-maintained open-source projects working on algorithmic fairness and bias auditing — sourced from real GitHub repositories.
-
----
-
-## 🏆 Featured Projects
-
-### 1. [AI Fairness 360 (AIF360)](https://github.com/Trusted-AI/AIF360)
-- **Maintainer**: IBM / Trusted-AI
-- **Stars**: ⭐ 2,862 | **Language**: Python
-- **Last updated**: September 2026 (actively maintained)
-- **License**: Apache 2.0
-
-**What it does**: A comprehensive toolkit with 70+ fairness metrics and 15+ bias-mitigation algorithms. Covers pre-processing, in-processing, and post-processing methods. Includes interpretability modules and a `MetricTextExplainer` for natural-language explanations of fairness audit results.
-
-**Why it matters for the podcast**: AIF360 is one of the most widely cited fairness toolkits in academia and industry. Its scale — 70+ metrics — raises the exact questions our episode explores: *Can we really have a single number that captures "fairness"? When a metric says 0, does that actually mean fair?*
-
-**Notable ongoing debate**: [Issue #528](https://github.com/Trusted-AI/AIF360/issues/528) — A contributor argues that the `average_odds_difference` metric is mathematically misrepresented in its documentation, calling into question whether the metric's name matches what it actually measures.
+A curated collection of active, community-driven open-source projects working at the intersection of algorithmic fairness, bias auditing, and responsible AI. Each entry includes why it matters for the podcast and where to dive in.
 
 ---
 
-### 2. [Aequitas](https://github.com/dssg/aequitas)
-- **Maintainer**: University of Chicago (Data & Society Project Group)
-- **Stars**: ⭐ 773 | **Language**: Python  
-- **Last updated**: September 2026 (actively maintained)
-- **License**: MIT
+## 🏆 Tier 1 — Major Toolkits (Production-Scale)
 
-**What it does**: A bias-auditing toolkit designed for data scientists, ML researchers, and policymakers. Provides confusion-matrix-based fairness metrics with an interactive API and visualization tools. Version 1.0 ("Aequitas Flow") adds full Fair ML experimentation — pre-processing, in-processing, and post-processing methods.
+### 1. [Fairlearn](https://github.com/fairlearn/fairlearn) — `fairlearn/fairlearn`
+- **Stars:** 2,286 | **Language:** Python | **License:** MIT
+- **What it does:** Provides a Python package to assess and improve the fairness of machine learning models. Includes `MetricFrame` for disaggregated evaluation, fairness visualizations, and mitigation algorithms (reductions, post-processing, pre-processing).
+- **Why it matters for the podcast:** Fairlearn explicitly frames fairness as a *sociotechnical* challenge — not just a math problem. Its maintainers actively debate how the tool should serve different users (novice vs. advanced, classification vs. reinforcement learning). The ongoing [MetricFrame API debate](https://github.com/fairlearn/fairlearn/issues/756) (74 comments, still open) is a perfect case study in the tensions we cover.
+- **Get started:** `pip install fairlearn` | [Tutorials](https://fairlearn.org/)
 
-**Why it matters for the podcast**: Aequitas explicitly targets *non-technical* audiences (policymakers, auditors) alongside engineers. Its design philosophy — making fairness auditing accessible to people outside ML — is itself a sociotechnical choice worth examining. Who gets to decide what "fair" looks like?
+### 2. [AI Fairness 360 (AIF360)](https://github.com/Trusted-AI/AIF360) — `Trusted-AI/AIF360`
+- **Stars:** 2,866 | **Language:** Python/R | **License:** Apache-2.0
+- **What it does:** IBM's comprehensive toolkit containing 70+ fairness metrics and 15+ bias-mitigation algorithms spanning the entire ML lifecycle (pre-processing, in-processing, post-processing). Available in both Python and R.
+- **Why it matters for the podcast:** AIF360 is one of the most complete fairness toolkits in existence, but its scope is also part of the critique — the sheer number of metrics and algorithms can overwhelm users. The project's *responsibility* to make these tools accessible to non-experts while maintaining scientific rigor is a recurring theme in its issue threads.
+- **Get started:** `pip install aif360` | [Interactive demo](https://aif360.res.ibm.com/data) | [Documentation](https://aif360.readthedocs.io/)
 
-**Key feature**: Built-in datasets (BankAccountFraud, FolkTables) and Colab notebooks that walk users through real bias audits with the COMPAS recidivism dataset.
-
----
-
-### 3. [Responsibly](https://github.com/ResponsiblyAI/responsibly)
-- **Maintainer**: ResponsiblyAI
-- **Stars**: ⭐ 101 | **Language**: Python
-- **Last updated**: September 2026 (actively maintained)
-- **License**: MIT
-
-**What it does**: A Python-first auditing toolkit aligned with the textbook *Fairness and Machine Learning* (Barocas, Hardt & Narayanan). Three sub-packages: dataset benchmarks, binary-classification fairness metrics & interventions, and word-embedding bias measurement.
-
-**Why it matters for the podcast**: Responsibly's explicit alignment with a canonical academic text raises an interesting question: *Should fairness tools be dictated by a single theoretical framework?* The book's authors (Barocas, Hardt, Narayanan) are hugely influential — but their framing of fairness as primarily a classification problem has also been critiqued for narrowing what "fairness" can mean.
-
-**Special focus**: Includes NLP-specific bias metrics (word embeddings), making it one of the few toolkits that bridges traditional ML fairness and NLP fairness.
+### 3. [Aequitas](https://github.com/dssg/aequitas) — `dssg/aequitas`
+- **Stars:** 772 | **Language:** Python | **License:** BSD-3-Clause
+- **What it does:** A bias audit toolkit from the University of Chicago's Data Science for Social Good lab. Focuses on confusion-matrix-based fairness auditing with an interactive web app (Ridgeline plots, slice statistics).
+- **Why it matters for the podcast:** Aequitas was built by social scientists and engineers *together* — its design reflects a deliberate choice to make fairness auditing accessible to people who aren't ML experts. The tool's architecture embodies the question: *should fairness tools be built for practitioners or for communities?*
+- **Get started:** [Gallery](https://aequitas.dssg.io/gallery/) | [Docs](https://aequitas.readthedocs.io/)
 
 ---
 
-## 📊 Quick Comparison
+## 🔬 Tier 2 — Specialized & Research Tools
 
-| Feature | AIF360 | Aequitas | Responsibly |
-|---------|--------|----------|------------|
-| Stars | 2,862 | 773 | 101 |
-| Metrics | 70+ | ~15 confusion-matrix-based | Standards from Barocas et al. |
-| Mitigation methods | 15+ | Pre/in/post-processing | Pre/in/post-processing |
-| NLP support | Limited | No | Yes (word embeddings) |
-| Target audience | Practitioners & researchers | Practitioners, policymakers, researchers | Practitioners & researchers |
-| Active maintenance | ✅ Updated Sep 2026 | ✅ Updated Sep 2026 | ✅ Updated Sep 2026 |
-| License | Apache 2.0 | MIT | MIT |
+### 4. [Fair-Code](https://github.com/yakew7/Fair-Code) — `yakew7/Fair-Code`
+- **Stars:** 47 | **Language:** HTML/Python
+- **What it does:** A collection of 7 open-source audits for algorithmic bias across criminal justice, hiring, lending, healthcare, welfare, and tenant screening. Each audit comes with measurable fairness goals and real-world impact analysis.
+- **Why it matters for the podcast:** This project is notable for its *domain specificity* — it doesn't try to be a general-purpose toolkit but instead provides deep, contextual audits for high-stakes decision domains. It embodies the argument that fairness tools should be built *with* the communities they affect, not *for* them from the outside.
 
----
-
-## 🔍 How to Use This Resource
-
-- **Podcast listeners**: Start with the project whose audience matches yours. Aequitas if you're new to fairness auditing. AIF360 if you want the full technical picture. Responsibly if you care about NLP.
-- **Contributors**: Add your own favorite fairness tools below. Follow the format above.
-- **Debaters**: Check `DEBATES.md` for real GitHub controversies pulled from these projects.
+### 5. [Responsibly](https://github.com/ResponsiblyAI/responsibly) — `ResponsiblyAI/responsibly`
+- **Stars:** 100 | **Language:** Python | **License:** Apache-2.0
+- **What it does:** A Python-first auditing toolkit aligned with the textbook *Fairness and Machine Learning* (Barocas, Hardt & Narayanan). Includes word-embedded bias metrics, image-based fairness metrics, and causal fairness analysis.
+- **Why it matters for the podcast:** Responsibly bridges the gap between academic fairness research and practical auditing. Its alignment with a canonical textbook gives it academic credibility, while its Python-first design makes it accessible to working practitioners.
 
 ---
 
-## 📖 Further Reading
+## 🏗️ Tier 3 — Emerging & Niche Tools
 
-- [Fairness and Machine Learning (Barocas, Hardt & Narayanan)](https://fairmlbook.org) — the canonical textbook that shapes most fairness tooling
-- [Aequitas tutorial (KDD/AAAI)](https://github.com/dssg/fairness_tutorial) — deep dive into fairness auditing methodology
-- [IBM Fairness Metrics documentation](https://aif360.readthedocs.io/) — reference for all AIF360 metrics
+### 6. [LiFT](https://github.com/linkedin/LiFT) — `linkedin/LiFT`
+- **Stars:** 173 | **Language:** Scala | **License:** Apache-2.0
+- **What it does:** LinkedIn's toolkit for measuring fairness at web scale using permutation testing. Designed for large-scale recommendation and search systems where traditional fairness metrics don't apply directly.
+- **Why it matters for the podcast:** LiFT demonstrates that fairness measurement at *web scale* creates entirely different challenges than fairness measurement in a single model. The "fairness of a recommendation system" is a fundamentally different question than "fairness of a hiring model."
 
 ---
 
-*This is a living document. To suggest additions or corrections, [open an issue](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues/new).*
+## 🗺️ How to Use This Resource
+
+| If you want to... | Start here |
+|-------------------|------------|
+| Understand the core fairness toolkit landscape | Read the Tier 1 descriptions above |
+| See fairness auditing in a specific domain | Look at Fair-Code (criminal justice, hiring, lending, etc.) |
+| Explore fairness at scale | Check out LiFT (LinkedIn's web-scale approach) |
+| Find the academic- practitioner bridge | Browse Responsibly |
+| Dive into the live debates | See [DEBATES.md](./DEBATES.md) and the [GitHub Issues](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues) in this repo |
+
+---
+
+*These projects represent a snapshot of the open-source fairness ecosystem as of 2025. The field evolves rapidly — if you find a project that should be included (or one that's no longer active), [open an issue](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues/new) and let us know.*
