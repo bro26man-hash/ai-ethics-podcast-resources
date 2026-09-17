@@ -10,19 +10,19 @@ A curated, crowdsourced collection of open-source projects, tools, and readings 
 - **Stars:** 2,866 | **Language:** Python / R | **License:** Apache-2.0
 - **Maintainer:** IBM Research (Trusted-AI org)
 - **What it does:** A comprehensive toolkit with 70+ fairness metrics and 15+ bias-mitigation algorithms covering the entire ML lifecycle — preprocessing, in-processing, post-processing. Includes interactive notebooks, R interface, and explanatory materials.
-- **Why it matters:** One of the earliest and most cited fairness toolkits. Its breadth illustrates how hard it is to operationalize "fairness" — different metrics often disagree, and choosing one over another is itself a value judgment. The tool's own internal categorization of metrics is the subject of a fierce unresolved debate (see Debate #2 and Debate #4 in DEBATES.md). Ongoing issues include a proposal to extend the Empirical Differential Fairness metric to return intersectional group-pair breakdowns (#558) and a long-standing debate about whether the website is maintained (#548).
+- **Why it matters:** One of the earliest and most cited fairness toolkits. Its breadth illustrates how hard it is to operationalize "fairness" — different metrics often disagree, and choosing one over another is itself a value judgment. The tool's own internal categorization of metrics is the subject of fierce unresolved debates (see Debate #2 and Debate #5 in DEBATES.md). Ongoing issues include a proposal to extend the Empirical Differential Fairness metric to return intersectional group-pair breakdowns (#558), a long-standing debate about whether the website is maintained (#548), and a fundamental challenge to whether its "average odds difference" metric actually measures what it claims (#528).
 
 ### 2. [Microsoft Fairlearn](https://github.com/fairlearn/fairlearn)
 - **Stars:** 2,285 | **Language:** Python | **License:** MIT
 - **Maintainer:** Microsoft (Fairlearn project under the .NET Foundation)
 - **What it does:** A Python package to assess and improve fairness of ML models. Provides metrics like demographic parity, equalized odds, and predictive rate parity, plus mitigation algorithms from pre-processing to post-processing. Core feature is the `MetricFrame` for disaggregated evaluation across sensitive groups. Explicitly frames fairness as a *sociotechnical* challenge — not just a mathematical one.
-- **Why it matters:** Fairlearn's `MetricFrame` is the go-to tool for disaggregated evaluation. Its governance model and ongoing API debates make it a case study in how fairness tools are shaped by community discourse — and who gets left out of the design conversation. Active issues include a philosophical debate about whether species should be a recognized sensitive feature (#1625) and a technical inconsistency between MetricFrame and plot_roc_curve_by_group on missing sensitive values (#1725). (See Debate #1 and Debate #3 in DEBATES.md.)
+- **Why it matters:** Fairlearn's `MetricFrame` is the go-to tool for disaggregated evaluation. Its governance model and ongoing API debates make it a case study in how fairness tools are shaped by community discourse — and who gets left out of the design conversation. Active issues include a philosophical debate about whether species should be a recognized sensitive feature (#1625) and a technical inconsistency between MetricFrame and plot_roc_curve_by_group on missing sensitive values (#1725). (See Debate #1, #3, and #4 in DEBATES.md.)
 
 ### 3. [Responsibly](https://github.com/ResponsiblyAI/responsibly)
 - **Stars:** 101 | **Language:** Python | **License:** MIT
 - **Maintainer:** ResponsiblyAI (independent open-source collective)
 - **What it does:** A Python-first auditing toolkit aligned with the book *Fairness and Machine Learning* (Barocas, Hardt & Narayanan). Three sub-packages: `dataset` (benchmark datasets), `fairness` (demographic fairness in binary classification with metrics and algorithmic interventions), and `we` (word-embedded bias metrics and debiasing methods for NLP). Designed for practitioners and researchers familiar with scikit-learn, Numpy, and Pandas.
-- **Why it matters:** Responsibly fills an important gap between the heavyweight toolkits (AIF360's sheer breadth, Fairlearn's MetricFrame) and the need for a lightweight, scikit-learn-compatible workflow. Its NLP focus (the `we` module for word-embedding bias) makes it one of the few fairness tools that explicitly addresses language-model bias — the very domain where much contemporary algorithmic harm occurs. Its alignment with the Barocas/Hardt/Narayanan textbook means its fairness definitions inherit the philosophical tensions those authors themselves acknowledge: multiple incommensurable fairness definitions, no neutral choice. (See Debate #3 in DEBATES.md for how fairness tooling struggles with scope boundaries — a question that becomes sharper when the tool is explicitly NLP-focused.)
+- **Why it matters:** Responsibly fills an important gap between the heavyweight toolkits (AIF360's sheer breadth, Fairlearn's MetricFrame) and the need for a lightweight, scikit-learn-compatible workflow. Its NLP focus (the `we` module for word-embedding bias) makes it one of the few fairness tools that explicitly addresses language-model bias — the very domain where much contemporary algorithmic harm occurs. Its alignment with the Barocas/Hardt/Narayanan textbook means its fairness definitions inherit the philosophical tensions those authors themselves acknowledge: multiple incommensurable fairness definitions, no neutral choice. (See Debate #3 in DEBATES.md for how fairness tooling struggles with scope boundaries.)
 
 ### 4. [Aequitas](https://github.com/dssg/aequitas)
 - **Stars:** 773 | **Language:** Python | **License:** MIT
@@ -34,12 +34,13 @@ A curated, crowdsourced collection of open-source projects, tools, and readings 
 
 ## 📂 Additional Notable Projects
 
-| Project | Stars | Description |
-|---------|-------|-------------|
-| **Themis-ML** | 126 | Fairness-aware ML algorithms (massaging, reject option classification) built on pandas/sklearn. Explicitly frames fairness as the inverse of discrimination. | [cosmicBboy/themis-ml](https://github.com/cosmicBboy/themis-ml) |
+| Project | Stars | Description | Link |
+|---------|-------|-------------|------|
+| **Fair-Code** | 46 | Seven open-source algorithmic audits across criminal justice, hiring, lending, healthcare, welfare, tenant screening — with measurable fairness goals | [yakew7496/Fair-Code](https://github.com/yakew7496/Fair-Code) |
+| **EqualityML** | 35 | Evidence-based tools and community collaboration to end algorithmic bias, one data scientist at a time | [EqualityAI/EqualityML](https://github.com/EqualityAI/EqualityML) |
+| **Themis-ML** | 126 | Fairness-aware ML algorithms (massaging, reject option classification) built on pandas/sklearn. Explicitly frames fairness as the inverse of discrimination | [cosmicBboy/themis-ml](https://github.com/cosmicBboy/themis-ml) |
 | **Infosys Responsible AI Toolkit** | 300+ | Modular toolkit covering fairness, bias detection, privacy, safety, security for both LLMs and traditional ML | [Infosys/Infosys-Responsible-AI-Toolkit](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit) |
 | **LiFT** | 173 | LinkedIn's Scala/Spark toolkit for web-scale fairness measurement with permutation testing | [linkedin/LiFT](https://github.com/linkedin/LiFT) |
-| **Fair-Code** | 46 | Seven open-source algorithmic audits across criminal justice, hiring, lending, healthcare, welfare, tenant screening | [yakew7496/Fair-Code](https://github.com/yakew7496/Fair-Code) |
 
 ---
 
