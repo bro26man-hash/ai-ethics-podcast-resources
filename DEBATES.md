@@ -122,65 +122,56 @@ Choosing a fairness metric is not a technical decision — it's an **ethical and
 
 ---
 
-## Debate 4: Who Should a Fairness Tool Serve? — The Species-as-Sensitive-Feature Proposal
+## Debate 4: The Average-Odds Documentation Bug — What Does "Zero" Mean in AIF360?
 
-**Source:** [Fairlearn Issue #1625](https://github.com/microsoft/fairlearn/issues/1625)  
-**Project:** [Fairlearn](https://github.com/microsoft/fairlearn) (Microsoft-backed, the most widely deployed fairness library in Python)  
-**Tags:** `enhancement`  
-**Status:** Open, unresolved (maintainers declined; referred to another project)
+**Source:** [Trusted-AI/AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528)  
+**Project:** [IBM AIF360 — AI Fairness 360](https://github.com/Trusted-AI/AIF360)  
+**Tags:** `documentation`, `bug`  
+**Status:** Open since April 2024 — unresolved, 2 👍 reactions, 1 correction comment (September 2026)
 
-### The Proposal
+### The Bug Report
 
-Researcher Samuel Tucker-Davis proposed adding **species** as a recognized sensitive feature in Fairlearn's fairness evaluation framework. The case rests on peer-reviewed evidence:
+AndreFCruz filed this issue after noticing that the [AIF360 documentation](https://aif360.readthedocs.io/en/stable/modules/generated/aif360.metrics.ClassificationMetric.html) states:
 
-- **Hagendorff et al. (2023)** *"Speciesist bias in AI"* (AI and Ethics): Found GPT-3 associates farmed animals with violence; explicitly calls for fairness frameworks to include speciesist bias metrics.
-- **SpeciesismBench (2025)**: LLMs "frequently normalized harm toward farmed animals while refusing to do so for non-farmed animals."
-- **AHA Benchmark (2025)**: 4,350 items documenting species-dependent risks of harm in LLM outputs.
+> *"A value of 0 indicates equality of odds."*
 
-The proposer offered to contribute documentation, example notebooks, and metric implementations, and pointed to Open Paws — an organization building AI tools for animal advocacy.
+for the `average_odds_difference` metric.
 
-### The Maintainers' Response
+But that's mathematically wrong. As the issue's attached diagram shows, there are configurations where `average_odds_difference = 0` yet **equality of odds does not hold**. The metric formula and the equalized-odds criterion are measuring different things, and the documentation conflates them.
 
-**Tamara Atanasoska** (maintainer, computational linguist) acknowledged the research but declined on three grounds:
+The same error appears on IBM's own fairness metrics explainer page.
 
-1. **Scope:** Fairlearn targets "traditional machine learning" — tabular models — not NLP. The cited papers are all about language models.
-2. **Architecture:** Fairlearn does not maintain a fixed list of sensitive features. "Any column of information can become a sensitive attribute or a proxy for it. The sensitive attribute is just a variable."
-3. **Referral:** Pointed to PyRIT (Microsoft's Responsible AI Testing tool) as the proper venue.
+### The Two Sides
 
-**Roman Lutz** (maintainer, also PyRIT maintainer) seconded the referral: "this is very much in scope there."
+**Side A — This is a documentation bug, not a conceptual one.** The metric itself is well-defined; the problem is that the docstring says "equality of odds" when it should say something like "a relaxation of equality of odds" or "average odds difference." Fix the words, not the math.
 
-### The Underlying Tension
+**Side B — The terminology matters because it shapes policy.** If AIF360 — the most widely used fairness toolkit in production and government — labels a metric as indicating "equality of odds" when it doesn't, then every audit report, regulatory filing, and court brief that cites this metric inherits the error. The documentation isn't just describing the tool; it's defining what "fairness" means in practice.
 
-This exchange crystallizes a foundational question that runs through the entire fairness ecosystem:
+### The Community Response
 
-**Is a fairness tool's boundary a legitimate scope decision — or a form of exclusion that replicates the very bias it aims to fight?**
+After 17 months with no maintainer response, Hanabi9248 volunteered in September 2026 with a focused correction:
 
-The maintainers' position — "we don't define sensitive features; users decide" — is a **neutrality claim**. It says the tool is a general-purpose instrument: provide the metric, and let each community decide what column to pass. But the critique (from the proposer and from critical AI studies scholarship) is that **neutrality just defaults to the status quo**. When a tool's default examples, documentation, and community conversations center race and gender but never mention species, disability, caste, or sexual orientation, the "neutral" tool implicitly tells non-dominant communities: *you are not who we built this for*.
+- Fix the docstrings in `MetricTextExplainer` and its JSON output
+- Provide a four-row example where `average_odds_difference = 0` while both `average_abs_odds_difference` and `equalized_odds_difference` = 1
+- The metric formulas remain unchanged — only the descriptions and examples are corrected
 
-This is not hypothetical. The same dynamic plays out in:
-- **Healthcare AI** — bias audits that check race and sex but not disability status, leaving Deaf and blind patients invisible in "fair" models.
-- **Criminal justice** — risk scores that measure race and gender but not immigration status, despite its documented impact on sentencing outcomes.
-- **Hiring tools** — fairness metrics that check gender and race but not age, structurally excluding older workers from "fair" consideration.
+But the issue remains open, unassigned, and unmerged.
 
-In each case, the tool's architects claim neutrality ("just pass any column"), but the **default design** — the examples, the documentation, the community norms — tells users which columns matter. And what's not in the examples is, in practice, not in the audit.
+### Why It Matters Beyond the Repo
 
-### The Deeper Questions
+This is not a niche documentation cleanup. It reveals a structural tension in the fairness toolkit ecosystem:
 
-1. **Should fairness tools ship with a curated list of recognized sensitive attributes, or should they remain completely agnostic?** A curated list empowers inclusion but risks being outdated. Complete agnosticism respects user autonomy but places the burden of inclusion entirely on communities who may not know the tool exists.
+1. **The gap between research definitions and production tooling.** Research papers define fairness metrics with mathematical precision. Toolkits wrap them in APIs with docstrings that simplify — and sometimes distort — the original definitions.
 
-2. **When a maintainer says "this isn't our scope," is that responsible boundary-setting or a refusal to acknowledge harm outside the tool's original design parameters?** Scope boundaries are real — no tool can cover everything. But the *way* scope is enforced matters. A referral to PyRIT is helpful if you know PyRIT exists. A silent closed issue is not.
+2. **Who maintains the definitions?** AIF360 is an IBM Research project. When a volunteer identifies a documentation error and no IBM maintainer responds for 17 months, the question isn't just "who fixes the docstring?" but "who owns the standard?"
 
-3. **Does the "just pass any column" architecture actually empower users, or does it replicate the very structural invisibility it claims to fight?** If the tool's defaults and examples never mention disability, caste, or species, a user from those communities may never think to check — not because the tool prevents it, but because the tool's community never told them it was possible.
+3. **The downstream harm.** Courts citing AIF360's metrics, regulators referencing its documentation, and engineers trusting its API — all inherit whatever the docstring says. A misleading docstring isn't an academic issue; it's a real-world harm vector.
 
-### Fairlearn's Current Status
-
-As of September 2026, Fairlearn issue #1625 remains open with no maintainer resolution. The proposal has 2 comments — both from maintainers declining — and no counter-proposal from the contributor. The issue sits as a quiet monument to the question: **when the people who build the tools say "we don't decide who counts," who decides?**
-
-**Discussion prompts for the podcast:**
-- Should fairness tools have a **minimum viable scope** — a curated list of protected attributes they explicitly support — or should they be entirely general-purpose?
-- Is "we don't define sensitive features" a liberating design choice or an abdication of responsibility?
-- When a marginalized community wants to use a fairness tool to audit harm against them, but the tool's examples and norms never mentioned their category — is that the community's failure to discover the tool, or the tool's failure to make room?
-- Who should have the power to decide what counts as a "sensitive attribute" in a fairness audit — the tool's maintainers, the auditing organization, the affected community, or a regulatory body?
+**Discussion prompts for the episode:**
+- Should fairness toolkits be required to publish formal verification of their metric definitions — the way cryptographic libraries publish formal proofs?
+- Who should maintain the "official" definitions of fairness metrics — a single org, a consortium, or the community?
+- If a documentation error in a fairness toolkit leads to a biased decision in a court, who bears liability?
+- Is 17 months ofunmaintained documentation a symptom of the "research-to-production gap" in AI ethics?
 
 ---
 
