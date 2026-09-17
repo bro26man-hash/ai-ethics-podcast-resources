@@ -1,14 +1,62 @@
-# ⚡ Ongoing Debates in the Fairness Community
+# ⚔️ Active Debates in the Fairness Community
 
-Real GitHub issue threads that surfaced genuine, unresolved disagreements about how fairness tools should work — and who they should serve. Each entry is extracted from the source thread and contextualized for podcast discussion.
+This page documents **real, unresolved controversies** from GitHub issue threads in major fairness toolkits. These aren't academic thought experiments — they represent disagreements among the people who build and maintain the tools that shape how society measures and enforces fairness in algorithmic systems.
 
 ---
 
-## 🔥 Debate #1: Should a Fairness Toolkit Try to Do Everything?
+## 🔥 Featured Debate #1: What Does "Average Odds Difference = 0" Actually Mean?
 
-**Source:** [fairlearn/fairlearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756) — "MetricFrame should support metrics that don't require y_true and y_pred"
-**Status:** 🟡 Open (74 comments, no resolution as of September 2025)
-**Labels:** API
+**Source**: [Trusted-AI/AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528)
+**Topic**: Whether the `average_odds_difference` metric is correctly documented as an "equalized odds relaxation"
+**Started**: April 23, 2024 | **Status**: Still open | **Reactions**: 👍 2
+
+### The Core Question
+
+The AIF360 documentation states:
+
+> *"A value of 0 indicates equality of odds."*
+
+But contributor **AndreFCruz** argues this is mathematically wrong. They demonstrate that there exist pairs of points where `average_odds_difference = 0` **but equalized odds do NOT hold**. The error, they claim, isn't just in the code — it's propagated to IBM's official documentation and to the `MetricTextExplainer` API output, meaning **practitioners worldwide may be misreading their fairness reports**.
+
+### Why This Debate Matters
+
+This isn't pedantry. The definition of "average odds difference" shapes what practitioners conclude about their models. If the metric underestimates bias (showing 0 when bias still exists), then:
+
+1. **Organizations deploy models they believe are fair but aren't.** A lending model that appears to satisfy equalized odds may actually be systematically disadvantaging a protected group on true positive rate.
+
+2. **The fairness "Industry standard" is built on a potentially flawed foundation.** AIF360's metrics are cited in academic papers, used in compliance audits, and referenced in regulatory submissions. A definitional error doesn't just stay in the repo — it flows into the broader ecosystem.
+
+3. **It raises the question: who guards the guards?** When a single company (IBM) controls both the toolkit and the documentation, and an external contributor has to flag the problem, what institutional safeguards exist for catching these errors? The issue has been open for over 2 years with no maintainer response.
+
+### The Positions
+
+| Position | Argument |
+|----------|----------|
+| **"It's a bug"** | The docstring is wrong; the formula doesn't correspond to equalized odds. This has been cited as fact in IBM's public documentation, creating a systemic mischaracterization. Fix the formula and the docs. |
+| **"It's a naming problem"** | The `average_odds_difference` metric isn't the same as `average_abs_odds_difference` — it's a different, looser measure. The fix isn't to change the formula but to clarify the documentation so practitioners understand what each metric actually measures. |
+| **"The real problem is that fairness metrics are practiced without philosophical rigor"** | This error is a symptom of a deeper issue: fairness metrics are often defined by convenience rather than by philosophical coherence. The field lacks a rigorous formal foundation — and when practitioners adopt these metrics without understanding the theory, errors propagate silently. |
+
+### What's Happened So Far
+
+- **AndreFCruz** (the reporter) provided a visual proof (embedded image in the issue) showing that points on a certain line have `average_odds_difference = 0` while `equalized_odds_difference = 1`.
+- **Hanabi9248** (a community contributor) offered to fix both the code docstrings and the `MetricTextExplainer` output, with a four-row example demonstrating the discrepancy. They proposed keeping the formula unchanged and correcting the documentation instead.
+- The issue remains **open with no maintainer response** — over 2 years since creation. This absence of maintainer engagement is itself a data point for the podcast: **what does it mean when the institutions behind fairness tools don't respond to cited errors?**
+
+### Discussion Questions for the Episode
+
+1. Is it better to fix the formula or fix the documentation? What are the trade-offs?
+2. How many other fairness metrics in widely-used toolkits have similar definitional ambiguities?
+3. Should there be an independent, third-party review of fairness metric definitions — similar to how math papers are peer-reviewed?
+4. Who should be responsible when a fairness tool's documentation is wrong? The developers? The company? The open-source community?
+
+---
+
+## 🔥 Featured Debate #2: Should a Fairness Toolkit Try to Do Everything? (The MetricFrame War)
+
+**Source**: [fairlearn/fairlearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756)
+**Topic**: Should `MetricFrame` support metrics that don't require `y_true` and `y_pred`?
+**Started**: Open (74 comments, still active as of September 2025)
+**Labels**: API
 
 ### The Core Question
 
@@ -69,57 +117,47 @@ This debate is not really about Python API design. It's about **who fairness too
 
 ---
 
-## 🔥 Debate #2: Does a Popular Fairness Metric's Documentation Mislead Practitioners About What It Actually Measures?
+## 🔥 Featured Debate #3: Intersectionality vs. Single-Axis Fairness
 
-**Source:** [Trusted-AI/AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528) — "`average_odds_difference` metric is wrongly represented as an equalized odds relaxation"
-**Status:** 🟡 Open (as of April 2024, still unresolved — 1 maintainer comment, Sep 2026)
-**Opened by:** [@AndreFCruz](https://github.com/AndreFCruz) | **Reactions:** 👍 2
+**Source**: [Trusted-AI/AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558)
+**Topic**: Extending the Empirical Differential Fairness (EDF) metric for intersectional analysis
+**Started**: January 21, 2026 | **Status**: Still open
 
 ### The Core Question
 
-In AIF360's official documentation, the `average_odds_difference` metric is described as: *"A value of 0 indicates equality of odds."* This is a significant claim — it tells practitioners that if they see a score of 0, their model satisfies the equalized odds criterion, a widely-used fairness definition requiring that true positive rates and false positive rates be equal across demographic groups.
+The current EDF metric returns a **single scalar** summarizing fairness across all protected attribute values. But contributor **jetverbeek** argues this is inadequate for intersectional analysis — you can't tell *which* combination of attribute groups is driving the maximum log-ratio. The request: extend the metric to return the top group-pair combinations and their individual log-ratios.
 
-But AndreFCruz, a careful reader and practitioner, argues that **this is mathematically wrong**. They demonstrate (with a geometric visualization) that there exist configurations where `average_odds_difference = 0` yet the model *clearly does not* satisfy equalized odds. The documentation, they contend, is not merely imprecise — it is **misleading in a way that could cause real harm**. A practitioner reading the docs might conclude their model is fair when it is not, leading to false confidence and potentially discriminatory decisions deployed at scale.
+### Why This Debate Matters
 
-The issue also notes that this same incorrect characterization appears on **IBM's published fairness metrics documentation**, extending the problem from the open-source library to its commercial and educational spin-offs.
+This exposes a fundamental tension in fairness tooling:
 
-### The Three Positions
+- **Single-axis fairness** (e.g., "Is the model fair to Black candidates?") is simple to measure but can hide disparities within subgroups. A model might be fair overall for "Black people" but severely unfair for Black women or Black disabled people.
+- **Intersectional fairness** requires more granular metrics, but these are harder to compute, harder to interpret, and harder to communicate to non-technical stakeholders.
 
-#### 🔵 Position A: Documentation Accuracy Is a Dependency, Not a Detail
-
-When a fairness toolkit tells users that a metric value of 0 means "you are fair," that is a *claim about the world*. If that claim is wrong, the entire trust architecture of the toolkit collapses. Practitioners build pipelines, run audits, sign off on compliance — all based on what the documentation says the numbers mean. An incorrect mathematical claim in docs isn't a typo; it's a structural failure that can propagate through real decision-making systems affecting real people's lives.
-
-#### 🟠 Position B: The Metric Naming Itself Is the Deeper Problem
-
-Others argue that the issue isn't just documentation but the *choice of metric itself*. The name `average_odds_difference` suggests it measures odds differences, but equalized odds is a specific, well-defined mathematical property. If the metric doesn't actually measure that property, the naming itself is the problem — not just the docstring. This camp would argue the fix should be renaming the metric or creating a new one, not just tweaking the documentation.
-
-#### 🟢 Position C (Maintainer's View): Fix the Docs, But This Reveals a Deeper Design Question
-
-Hanabi9248, an AIF360 maintainer, responded to the issue offering to assign themselves the fix, noting that the same error appears in the `MetricTextExplainer` and its JSON output. They have a "focused correction" with a four-row example where `average_odds_difference=0` while both `average_abs_odds_difference` and `equalized_odds_difference` are 1. The metric formulas remain unchanged — the fix is documentation-only. But this raises the question: *how did this error survive peer review, Bayesian testing, and years of citations?* And more importantly: what other claims in the toolkit's 70+ metric documentation might need similar scrutiny?
-
-### Why This Matters for the Podcast
-
-This issue exposes a fault line that runs through the entire fairness tooling ecosystem:
-
-1. **The gap between mathematical rigor and engineering pragmatism**: Academic fairness metrics are defined with mathematical precision, but toolkit implementers must make choices about naming, documentation, and default behavior that affect how non-mathematicians understand them. Every abstraction layer introduces the possibility of distortion.
-
-2. **Accountability of toolkit maintainers**: When IBM Research's toolkit tells a bank's compliance officer that their model is "fair" based on a metric score, who bears responsibility when that metric is later shown to be misdocumented? The maintainer? The institution? The user?
-
-3. **The replication crisis in fairness research**: If a widely-used metric's documentation is wrong, how many research papers have cited it as evidence that a model "satisfies equalized odds" when it doesn't? The implications for the academic literature are profound.
-
-4. **Who gets harmed by imprecise documentation**: The answer is not abstract. It's the communities whose lives are affected by algorithmic decisions — the people who never see the metric score, never read the docstring, but who bear the consequences when "fair" means something different than what they were told.
+Community contributor **Hanabi9248** offered a technical solution (keep the scalar method, add a separate breakdown method), but the fundamental design question remains: **should fairness tools default to intersectional analysis, or should that be opt-in?**
 
 ### Discussion Questions
 
-- If you were a compliance officer at a bank using AIF360, how would you verify that the metric documentation is correct — and what would you do if you couldn't?
-- Should toolkit maintainers be held to a standard of mathematical proof for every claim in their documentation? Who would enforce that?
-- Is it possible for a single metric to truly "indicate" a complex fairness property like equalized odds? Or does reducing a multidimensional concept to one number inevitably produce a misleading story?
-- If you discovered that a fairness metric you'd been citing in your research was misdocumented, how would you respond? Would you retract, correct, or wait for the maintainers to fix it?
+1. Should fairness metrics default to intersectional analysis, or is that premature? Who decides?
+2. If a tool only reports single-axis metrics, is it ethically negligent for not flagging potential intersectional harms?
+3. How do you communicate intersectional fairness results to a hiring committee or a board of directors?
 
 ---
 
-## 📌 Found a Debate?
+## 📋 Debate Tracking Template
 
-Found a heated thread in AIF360, Aequitas, Fairlearn, or another fairness project? [Open an issue](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues/new) in this repo and tag it with `[DEBATE]` — we'll curate it here.
+For future debates, maintain this structure:
 
-*Debates are extracted from live GitHub issue threads. All positions are represented fairly and attributed to their original authors. The goal is not to declare a winner — it's to understand the sociotechnical tensions that make fairness work hard.*
+| Field | Value |
+|-------|-------|
+| **Issue link** | URL |
+| **Toolkit** | AIF360 / Fairlearn / Aequitas / other |
+| **Topic** | One-line summary |
+| **Core tension** | What fundamental question is at stake? |
+| **Positions** | At least 2, fairly represented |
+| **Maintainer response** | Yes / No / Partial — and what that says about institutional accountability |
+| **Podcast angle** | What makes this compelling for a general audience? |
+
+---
+
+*Debates are extracted directly from GitHub issue threads. We strive to represent all positions fairly. To suggest a debate for inclusion, [open an issue](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues/new).*
