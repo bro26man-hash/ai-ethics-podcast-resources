@@ -18,16 +18,18 @@ We believe the most interesting stories about AI ethics aren't in the headlines 
 ai-ethics-podcast-resources/
 ├── RESOURCES.md    # Curated links to open-source fairness projects
 ├── DEBATES.md      # Summaries of ongoing controversies from issue threads
+├── PODCAST.md      # Episode planner with hooks, key questions, and talking points
 ├── README.md       # This file
 ```
 
 ## 🔍 What You'll Find
 
 ### Active Fairness Toolkits
-We track **2–3 active open-source projects** per episode, spanning:
+We track **3+ active open-source projects** per episode, spanning:
 - **Bias auditing pipelines** — end-to-end fairness audits on real datasets (COMPAS, hiring, lending, healthcare)
 - **Fairness metric libraries** — implementations of demographic parity, equalized odds, predictive parity, counterfactual fairness
 - **Governance & compliance platforms** — evidence-grade AI assurance for regulatory frameworks (EU AI Act, NIST AI RMF)
+- **Academic research tools** — smaller, principled libraries that prioritize clarity over comprehensiveness
 
 ### Live Debates
 Each episode zooms in on a **specific ongoing disagreement** from an open issue thread:
@@ -37,6 +39,7 @@ Each episode zooms in on a **specific ongoing disagreement** from an open issue 
 - Can counterfactual fairness ever be computed without a contested causal graph?
 - What does "zero" actually mean in a fairness metric? (AIF360 #528 — see DEBATES.md)
 - Should fairness tools support intersectional analysis, or is a single scalar enough? (AIF360 #558 — see DEBATES.md)
+- Who does a fairness tool serve — practitioners, researchers, or the communities being audited? (FairLearn #756 — see DEBATES.md)
 
 ## 🤝 How to Contribute
 
@@ -51,11 +54,12 @@ We welcome contributions from everyone — podcasters, engineers, ethicists, and
 
 Each episode centers on a **real, unresolved controversy** from the open-source community. Current featured debates include:
 
-- **The Average-Odds Documentation Bug** (AIF360 #528) — When the most-cited fairness toolkit ships a metric docstring that misstates what "zero" means, who owns the definition?
-- **The Intersectional Analysis Gap** (AIF360 #558) — Should fairness tools return a single scalar, or should they break down discrimination by specific group combinations?
+- **The Average-Odds Documentation Bug** (AIF360 #528) — When the most-cited fairness toolkit ships a metric docstring that misstates what "zero" means, who owns the definition? After 17 months, a volunteer offered a fix — but no maintainer has merged it.
+- **The Intersectional Analysis Gap** (AIF360 #558) — Should fairness tools return a single scalar, or should they break down discrimination by specific group combinations? A volunteer offered to implement the enhancement.
+- **The MetricFrame API Design Debate** (FairLearn #756) — 74 comments, 5 months, unresolved. Should a fairness tool be a general-purpose framework or a specialized instrument?
 - **The Missing-Value Contract** (FairLearn #1725) — Should fairness tools be strict or silent when sensitive data is missing?
-- **The SHAP Measurement Problem** — Does the choice of denominator change the story of racial bias?
-- **The Counterfactual Fairness Reversal** — When a reproduction contradicts the original claim, who gets to tell the corrected story?
+- **The SHAP Measurement Problem** (Fair-Code #672) — Does the choice of denominator change the story of racial bias?
+- **The Impossibility Triangle** (Fair-Code #665) — When two metrics give contradictory answers, whose rights should the metric protect?
 
 ## 📬 Feedback & Discussion
 
@@ -63,6 +67,33 @@ Each episode centers on a **real, unresolved controversy** from the open-source 
 - **Debate nominations** — Found a great fairness thread? Open an issue with label `debate-nomination`
 - **General discussion** — Open any issue, tag it `discussion`
 
+## 🎙️ Subscribe & Support
+
+- **RSS** — [PODCAST.md](PODCAST.md) for episode outlines and talking points
+- **Resources** — [RESOURCES.md](RESOURCES.md) for the full project catalog
+- **Debates** — [DEBATES.md](DEBATES.md) for deep dives into the controversies
+
 ## 📜 License
 
 This resource hub is released under the [MIT License](LICENSE). Individual project links remain the property of their respective authors.
+
+## Repository Structure
+
+### Files
+
+| File | Description |
+|---|---|
+| `RESOURCES.md` | Curated links to open-source fairness projects, with stars, licenses, and podcast angles |
+| `DEBATES.md` | Deep summaries of ongoing controversies from GitHub issue threads |
+| `PODCAST.md` | Episode planner with hooks, key questions, guest suggestions, and talking points |
+| `README.md` | This file — hub overview and contribution guide |
+
+## 🔗 Quick Links
+
+- [📚 Resources](RESOURCES.md) — Project catalog
+- [⚖️ Debates](DEBATES.md) — Controversy summaries
+- [🎙️ Episodes](PODCAST.md) — Episode planner
+- [🔍 AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528) — The average_odds_difference documentation bug
+- [🔍 FairLearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756) — The MetricFrame API design debate
+
+*Contributors: Add your favourite fairness project, debate, or episode idea — this hub is crowd-sourced by design.*
