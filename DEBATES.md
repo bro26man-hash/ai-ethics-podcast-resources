@@ -95,47 +95,7 @@ This isn't just about SHAP. It's about **who gets to decide what number tells th
 
 ---
 
-## Debate 3: The Counterfactual Fairness Reversal — When the Reproduction Contradicts the Argument
-
-**Source:** [Fair-Code Issue #654](https://github.com/yakew7/Fair-Code/issues/654)  
-**Project:** [Fair-Code](https://github.com/yakew7/Fair-Code)  
-**Tags:** `bug`, `documentation`  
-**Status:** Open, unresolved
-
-### The Claim
-
-The [Counterfactual Fairness explainer](https://github.com/yakew7/Fair-Code/blob/main/explainers/counterfactual-fairness.md) presents a synthetic lending audit where:
-
-- 35.7% of applicants would get a different loan decision if they had been born into the other racial group
-- White applicants flip at 24.4%, Black applicants flip at 52.0%
-- The rhetorical point: *"this is the operational signature of race-based decisions — Black defendants flip much more often than White ones"*
-
-### The Reality
-
-When the author reproduced the exact code (same seed, same model, same pipeline):
-
-- Violation rate: **31.5%**, not 35.7%
-- White applicants flip at **32.1%**, Black applicants flip at **30.6%**
-- The groups flip at **nearly identical rates** — not the dramatic 52% vs 24.4% disparity the article claims
-
-### Why It's a Real Debate, Not Just a Bug
-
-This isn't a typo. It's a **structural problem in how counterfactual fairness audits are written**:
-
-1. **The narrative preceded the evidence.** The article's argument — "race-based decisions harm Black applicants more" — was written first. The code was assembled to illustrate it. When the code produced a different result, the article kept its rhetorical framing and the issue got filed as a "bug."
-
-2. **Simulation variance vs. rhetorical conviction.** The author labels the discrepancy as a numeric error, but the deeper issue is: **who gets to write the narrative of algorithmic harm?** The person who runs the audit, or the person who writes the explainer?
-
-3. **The general lesson.** If a fairness explainer can get its headline numbers wrong while being "technically reproducible," what does that mean for the thousands of blog posts, conference talks, and policy briefs that cite fairness statistics without reproduction checks?
-
-**Discussion prompts for the episode:**
-- Should fairness explainers be required to include reproduction code and output blocks?
-- Is there a difference between a "conceptual illustration" and a "reproducible audit" — and should one be labeled as the other?
-- When a reproduction contradicts the original claim, who gets to tell the corrected story?
-
----
-
-## Debate 4: The Impossibility Triangle — Which Fairness Metric Wins?
+## Debate 3: The Impossibility Triangle — Which Fairness Metric Wins?
 
 **Source:** [Fair-Code Explainer: Why Fairness Metrics Conflict](https://github.com/yakew7/Fair-Code/blob/main/explainers/fairness-metric-conflicts.md) + [Issue #665](https://github.com/yakew7/Fair-Code/issues/665)  
 **Project:** [Fair-Code](https://github.com/yakew7/Fair-Code)  
