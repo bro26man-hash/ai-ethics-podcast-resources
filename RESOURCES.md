@@ -4,7 +4,7 @@ A curated catalog of active open-source projects related to algorithmic fairness
 
 ---
 
-## 🏆 Featured Projects
+## 🏆 Featured Projects for Episode 12: "Who Measures Fairness?"
 
 ### 1. [IBM AIF360 — AI Fairness 360](https://github.com/Trusted-AI/AIF360) — *Comprehensive Fairness Metric Toolkit*
 
@@ -19,9 +19,9 @@ A curated catalog of active open-source projects related to algorithmic fairness
 
 **What it does:** A comprehensive set of fairness metrics for datasets and machine learning models, with explanations for each metric and algorithms to mitigate bias. Covers over 20 fairness metrics across multiple categories: group fairness (demographic parity, equalized odds, predictive parity), individual fairness, and causal fairness. Includes bias mitigation algorithms for pre-processing, in-processing, and post-processing.
 
-**Why it matters for the podcast:** AIF360 is the most widely deployed fairness toolkit in production ML pipelines. Its metric definitions are the de facto standard for fairness auditing in enterprise and government contexts. When the tool itself mislabels a metric — as in **Issue #528** (see `DEBATES.md`) — the stakes are not academic: courts and regulators reference these definitions.
+**Why it matters for the podcast:** AIF360 is the most widely deployed fairness toolkit in production ML pipelines. Its metric definitions are the de facto standard for fairness auditing in enterprise and government contexts. When the tool itself mislabels a metric — as in **[Issue #528](https://github.com/Trusted-AI/AIF360/issues/528)** (see `DEBATES.md`) — the stakes are not academic: courts and regulators reference these definitions.
 
-**Key feature:** The `ClassificationMetric` class provides a unified API for computing fairness metrics, but as Issue #528 reveals, the documentation for `average_odds_difference` misrepresents what the metric actually measures.
+**Active controversy:** Issue #528 (open since April 2024) argues that `average_odds_difference` is wrongly documented as an equalized odds relaxation. A volunteer offered to fix the docstrings in September 2026, but no maintainer has responded. Meanwhile, **[Issue #558](https://github.com/Trusted-AI/AIF360/issues/558)** (open since January 2026) asks the metric to be extended for intersectional analysis — identifying which combinations of attribute groups contribute most to fairness violations. Together, these issues frame the episode's core question: **who gets to define what "fair" means in a fairness toolkit?**
 
 **Run it locally:**
 ```bash
@@ -30,29 +30,9 @@ from aif360.metrics import ClassificationMetric
 # See metric definitions and use examples in the docs
 ```
 
-**Podcast angle:** When the most-cited fairness toolkit ships with a documentation error about what "zero" means, who catches it — and who decides what the number means?
-
 ---
 
-### 2. [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn) — *Fairness Assessment & Mitigation*
-
-| | |
-|---|---|
-| **Stars** | 2,286 ⭐ |
-| **Language** | Python |
-| **License** | MIT |
-| **Last Updated** | September 2026 |
-| **Maintainer** | Microsoft (fairlearn org) |
-
-**What it does:** A Python package to assess and improve the fairness of machine learning models. Supports key fairness metrics (demographic parity, equalized odds, predictive parity, etc.) and mitigation algorithms (thresholding, re-weighting, adversarial debiasing). Designed for integration with scikit-learn workflows.
-
-**Why it matters for the podcast:** FairLearn is Microsoft's answer to AIF360 — same core metrics, different design philosophy. Where AIF360 is an IBM Research project with academic roots, FairLearn is built for practical ML pipelines inside Microsoft's ecosystem. The two toolkits sometimes define and compute the same metrics slightly differently, raising the question: **if two mainstream fairness tools disagree on a metric's definition, which one is "right"?**
-
-**Podcast angle:** The AIF360 vs. FairLearn divergence — when two big-tech fairness toolkits encode different mathematical choices, practitioners and regulators have no single authoritative reference.
-
----
-
-### 3. [Responsibly / ResponsiblyAI](https://github.com/ResponsiblyAI/responsibly) — *Bias Auditing & Mitigation Pipeline*
+### 2. [Responsibly / ResponsiblyAI](https://github.com/ResponsiblyAI/responsibly) — *Bias Auditing & Mitigation Pipeline*
 
 | | |
 |---|---|
@@ -61,16 +41,17 @@ from aif360.metrics import ClassificationMetric
 | **Language** | Python |
 | **License** | MIT |
 | **Last Updated** | September 2026 |
+| **Maintainer** | ResponsiblyAI community |
 
 **What it does:** A toolkit for auditing and mitigating bias and fairness in machine learning systems. Provides directional bias detection, fairness metrics, and mitigation algorithms with a particular focus on NLP models. Aligned with the book *Fairness and Machine Learning* by Barocas, Hardt, and Narayanan.
 
 **Why it matters for the podcast:** Responsibly occupies a middle ground — more structured than research-audit projects, more open than governance platforms. It's a case study in how fairness tooling evolves from research prototypes to maintainable packages. Its NLP focus also highlights a gap: most fairness tools are built for tabular data, but NLP models are increasingly used in high-stakes decisions (hiring screening, loan applications, content moderation).
 
-**Podcast angle:** How do fairness toolkits survive maintainer burnout? What does it mean when a team shifts from "research artifacts" to "maintained packages"? And why is NLP fairness so much harder than tabular fairness?
+**Open issues:** Issue #66 (open since 2023) reports installation problems that remain unresolved — a reminder that fairness tools can become orphaned when maintainers move on. Issue #29 (open since 2019) requests multi-value support for sensitive attributes, a feature needed for intersectional fairness analysis that still hasn't been addressed.
 
 ---
 
-### 4. [Fair-Code](https://github.com/yakew7/Fair-Code) — *Algorithmic Bias Detection & Mitigation (Research Audits)*
+### 3. [Fair-Code](https://github.com/yakew7/Fair-Code) — *Algorithmic Bias Detection & Mitigation (Research Audits)*
 
 | | |
 |---|---|
@@ -88,40 +69,19 @@ from aif360.metrics import ClassificationMetric
 
 ---
 
-### 5. [AWS SageMaker Clarify](https://github.com/aws/amazon-sagemaker-clarify) — *Fairness-Aware ML on AWS*
-
-| | |
-|---|---|
-| **Stars** | 75 ⭐ |
-| **Language** | Python |
-| **License** | Apache 2.0 |
-| **Last Updated** | May 2026 |
-| **Maintainer** | AWS |
-
-**What it does:** Fairness-aware machine learning. Bias detection and mitigation for datasets and models, integrated into the SageMaker ML pipeline.
-
-**Why it matters for the podcast:** Clarify represents the "fairness-as-a-service" model — bias auditing embedded in a commercial cloud platform. This raises the question: can fairness tools be both open-source and cloud-vendor-affiliated? Who controls the narrative when the auditor is also the platform provider?
-
-**Podcast angle:** The cloud-vendor fairness tool dilemma — audit independence when your auditor is also your competitors' infrastructure.
-
----
-
 ## 🗺️ The Fairness Landscape — Quick Reference
 
 | Project | Focus | Maturity | Best For |
 |---|---|---|---|
 | **AIF360** | Comprehensive metric library + mitigation | Industry-standard, IBM-maintained | Understanding how fairness is defined in production/government contexts |
-| **FairLearn** | Fairness assessment + mitigation | Microsoft-maintained, scikit-learn integration | Practitioners working in Microsoft/MLOps ecosystems |
 | **Responsibly** | Bias auditing + mitigation pipeline | Active development, growing community | Practical auditing with directional bias detection and NLP focus |
 | **Fair-Code** | Research audits + explainers | Production-quality audits, active development | Deep dives on specific domains (healthcare, justice, lending) |
-| **SageMaker Clarify** | Cloud-integrated fairness-aware ML | AWS-maintained, commercial integration | Fairness auditing within AWS ML pipelines |
 
 ---
 
 ## 📖 Essential Explainers & External Resources
 
 - [AIF360 documentation](https://aif360.readthedocs.io/en/stable/) — IBM's official metric documentation
-- [FairLearn documentation](https://fairlearn.readthedocs.io/) — Microsoft's fairness toolkit docs
 - [Responsibly documentation](https://docs.responsibly.ai) — Toolkit docs and guides
 - [Fair-Code live site](https://www.thefaircode.xyz) — Hosted explainers and interactive profiler
 - [ProPublica: Machine Bias (2016)](https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing) — The investigation that started the COMPAS debate
