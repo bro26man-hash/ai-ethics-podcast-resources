@@ -1,6 +1,6 @@
 # 📚 Open-Source Fairness Projects — Curated for the Podcast
 
-Three active, impactful projects where the theory of fairness meets the practice of auditing. Each one represents a different philosophy: comprehensive toolkit, real-world audit pipeline, and community-driven evidence.
+Three active, impactful projects where the theory of fairness meets the practice of auditing. Each one represents a different philosophy: comprehensive toolkit, transparent audit pipeline, and enterprise operationalization.
 
 ---
 
@@ -102,16 +102,46 @@ from fairlearn.metrics import MetricFrame
 
 ---
 
+## 4. [Infosys Responsible AI Toolkit](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit)
+
+| | |
+|---|---|
+| **Stars** | ⭐ 310 |
+| **Language** | Python |
+| **License** | MIT |
+| **Last updated** | September 2026 (actively maintained) |
+| **Forks** | 82 |
+
+**What it is:** A modular enterprise toolkit covering fairness, bias, safety, security, privacy, explainability, and hallucination detection — for both traditional ML and LLMs. Includes fairness metrics (Statistical Parity Difference, Disparate Impact Ratio, Four-Fifths Rule, Cohen's D) and mitigation methods (Equalized Odds, Re-weighing). Ships as a full UI with micro-frontend architecture and Azure OpenAI integration.
+
+**Why it matters for the podcast:** Represents the *industry practice* angle — how a global IT services company operationalizes responsible AI for enterprise clients. Also one of the few toolkits that explicitly extends fairness auditing to LLMs, which is the frontier of the debate. The modular architecture (10+ separate repos under one umbrella) raises questions about whether fragmentation helps or hinders adoption.
+
+**Podcast angle:** *When fairness is a product feature — who is the customer, and who is the subject of the audit?*
+
+**Fairness-specific modules:**
+- `responsible-ai-fairness` — Core fairness & bias detection for prompts, responses, and traditional ML
+- `responsible-ai-model-detail` — Model-level fairness assessment
+- `responsible-ai-reporting-tool` — Compliance-grade fairness reporting
+
+```bash
+# Fairness metrics importable from the toolkit
+from responsible_ai_fairness import FairnessDetector
+detector = FairnessDetector(metrics=['statistical_parity', 'disparate_impact', 'equalized_odds'])
+```
+
+---
+
 ## 📊 Comparison Matrix
 
-| | AIF360 | Fair-Code | FairLearn |
-|---|---|---|---|
-| **Stars** | 2,866 | 47 | 2,286 |
-| **Philosophy** | Comprehensive toolkit | Transparent audit pipeline | Practitioner-friendly API |
-| **Maintainer** | IBM / LF AI | Solo + community | Microsoft / PSF |
-| **Best for** | Understanding formal metric definitions | Domain-specific audits (COMPAS, healthcare, hiring) | Production MLOps integration |
-| **Live debate** | #528 — What does "zero" mean? | #672 — Does the denominator change the story? | #1725 — What serves who? |
-| **License** | Apache-2.0 | MIT | MIT |
+| | AIF360 | Fair-Code | FairLearn | Infosys RAI |
+|---|---|---|---|---|
+| **Stars** | 2,866 | 47 | 2,286 | 310 |
+| **Philosophy** | Comprehensive toolkit | Transparent audit pipeline | Practitioner-friendly API | Enterprise product suite |
+| **Maintainer** | IBM / LF AI | Solo + community | Microsoft / PSF | Infosys (commercial) |
+| **Best for** | Understanding formal metric definitions | Domain-specific audits (COMPAS, healthcare, hiring) | Production MLOps integration | Enterprise AI governance at scale |
+| **LLM support?** | No (traditional ML only) | No (traditional ML only) | Limited | Yes (prompts & responses) |
+| **Live debate** | #528 — What does "zero" mean? | #672 — Does the denominator change the story? | #1725 — What serves who? | #1725 — Enterprise vs. community? |
+| **License** | Apache-2.0 | MIT | MIT | MIT |
 
 ---
 
@@ -120,6 +150,7 @@ from fairlearn.metrics import MetricFrame
 - [AIF360 documentation](https://aif360.readthedocs.io/en/stable/) — IBM's official metric documentation (see Issue #528 for known errors)
 - [FairLearn documentation](https://fairlearn.readthedocs.io/) — Microsoft's fairness toolkit docs
 - [Fair-Code explainers](https://www.thefaircode.xyz) — 61 plain-language fairness explainers
+- [Infosys Responsible AI Toolkit docs](https://infosys.github.io/Infosys-Responsible-AI-Toolkit/) — Enterprise documentation
 - [AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528) — The average_odds_difference documentation bug (open since April 2024)
 - [AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558) — Extend Empirical Differential Fairness for intersectional analysis (open since January 2026)
 - [FairLearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725) — MetricFrame and missing sensitive feature values (open since September 2026)
