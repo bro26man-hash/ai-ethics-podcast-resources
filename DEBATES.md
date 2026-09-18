@@ -21,6 +21,17 @@ Real controversies happening in real repos. Each entry is based on an actual ope
 
 Andre says this is **false**. He provides a visualization (attached to the issue) showing that there exist pairs of ROC curves where `average_odds_difference = 0` but **equalized odds do not hold**. The error, he points out, is not just in the AIF360 documentation — it also appears on **IBM's own fairness metrics webpage**.
 
+### The Mathematics Behind the Bug
+
+The `average_odds_difference` is defined as the average of the absolute differences in False Positive Rates (FPR) and False Negative Rates (FNR) between groups. Andre's key insight: **two ROC curves can cross** in a way that produces an average odds difference of zero — meaning the FPR difference and FNR difference cancel each other out — even though neither FPR parity nor FNR parity holds individually. Equalized odds requires *both* TPR parity *and* FPR parity simultaneously, which is strictly stronger than average odds difference = 0.
+
+He demonstrates this with a four-row example where:
+- `average_odds_difference = 0` (the metric says "fair")
+- `average_abs_odds_difference = 1` (the absolute version says "unfair")
+- `equalized_odds_difference = 1` (the correct metric says "unfair")
+
+This means a practitioner relying on the documented metric could **certify a model as fair** when it is demonstrably unfair.
+
 ### Why This Matters
 
 The "average odds difference" metric is not an obscure corner case. It is one of the standard metrics shipped in the most widely used fairness toolkit in the world. If the documentation tells practitioners that zero means equality of odds — and that is not actually true — then:
@@ -28,6 +39,7 @@ The "average odds difference" metric is not an obscure corner case. It is one of
 1. **Audits can pass when they shouldn't.** A model could score 0 on average odds difference and still violate equalized odds, leading to a false sense of fairness.
 2. **The error propagates.** IBM's website, tutorial notebooks, and downstream documentation all repeat the claim. Anyone learning fairness from AIF360 inherits the mistake.
 3. **The definition of fairness is being silently distorted.** When a toolkit's docs are wrong about what a metric means, the toolkit shapes how an entire field thinks about fairness.
+4. **The explainer is also wrong.** The `MetricTextExplainer` — the tool that generates human-readable explanations of fairness results — contains the same error. If the explainer says "this model achieves equalized odds" when it doesn't, the mismatch is not academic. It's operational.
 
 ### The Response — Or Lack Thereof
 
@@ -35,7 +47,13 @@ After **17 months** with no maintainer response, **Hanabi9248** (a volunteer) co
 
 > *"Could you assign this to me? The cancellation also appears in MetricTextExplainer and its JSON output. I have a focused correction for both API docstrings and the explanations, with a four-row example where average_odds_difference is 0 while average_abs_odds_difference and equalized_odds_difference are both 1. The metric formulas remain unchanged."*
 
-This is a stunning admission in its own right: the error is **not just in the docs** — it's also in the `MetricTextExplainer`, the tool that generates human-readable explanations of fairness results. If the explainer says "this model achieves equalized odds" when it doesn't, the mismatch is not academic. It's operational.
+Key observations about Hanabi9248's offer:
+- The **metric formulas are mathematically correct** — the bug is purely in the interpretation/documentation, not the computation.
+- The error appears in **two places**: the API docstring AND the automated text explainer.
+- A concrete **four-row counterexample** already exists.
+- Yet after 6+ months since the volunteer offered, the issue remains **unassigned and unmerged**.
+
+This is a stunning admission in its own right: the error is **not just in the docs** — it's also in the `MetricTextExplainer`, the tool that generates human-readable explanations of fairness results.
 
 ### The Deeper Question: Who Decides What Zero Means?
 
@@ -45,14 +63,7 @@ This issue is really about **epistemic authority** in open-source fairness tools
 - **Does the documentation create reality?** If 1,000 practitioners read "A value of 0 indicates equality of odds" and trust it, does that make it true in practice — even if it's mathematically wrong?
 - **Who bears the cost of a doc bug?** AndreFCruz filed it. Hanabi9248 offered to fix it. But no AIF360 maintainer has merged the correction in 17 months. The people closest to the fix are not the people with commit access.
 - **Should fairness tools be more humble?** Maybe the real issue is that any single scalar claiming to capture "equality of odds" deserves a warning label — not a docstring that pretends it's definitive.
-
-### Key Quotes from the Thread
-
-> **AndreFCruz** (issue author): *"This mistake seems to be repeated on the IBM website"*  
-> — Implying the error is systemic, not just a GitHub oversight.
-
-> **Hanabi9248** (volunteer, Sept 2026): *"The metric formulas remain unchanged."*  
-> — Clarifying that this is a documentation fix, not a mathematical one. The tool works fine. The words are wrong.
+- **Is the "bytecode of fairness" trustworthy?** If the documentation layer is wrong, can you trust any output from the toolkit? The code may be right, but the interface between human and machine is lying.
 
 ### The Broader AIF360 Maintenance Picture
 
@@ -65,6 +76,14 @@ This documentation bug is not an isolated case. During research, we found severa
 
 The pattern: **documentation errors, infrastructure decay, and performance issues** all coexist. Volunteer corrections are welcome but unassigned.
 
+### Two Competing Narratives
+
+**Narrative A — "It's just documentation"**
+The metrics work correctly. The formulas are sound. A docstring error is a minor annoyance, not a fundamental flaw. The volunteer can fix it whenever the maintainer gets to it. Fairness research is fast-moving; the underlying theory (Hardt et al., 2016) is well-established.
+
+**Narrative B — "Documentation IS the tool"**
+For most practitioners, the docstring IS the fairness definition. They don't read the paper (Hardt et al., 2016). They don't derive the formula. They read the documentation and trust it. When the documentation says "zero means equality of odds," that becomes the working definition for thousands of audits, maybe millions of predictions. A doc bug isn't minor — it's a **silent failing** that corrupts the entire audit pipeline.
+
 ### Discussion Prompts for the Episode
 
 1. Should fairness toolkits be required to publish formal verification of their metric definitions — the way cryptographic libraries publish formal proofs?
@@ -75,6 +94,8 @@ The pattern: **documentation errors, infrastructure decay, and performance issue
 6. Is a volunteer-submitted fix with no maintainer merge pathway actually authoritative?
 7. Should fairness tool maintainers be required to respond to issues within a certain timeframe? What would that look like?
 8. If the documentation is wrong but the code is right, should you trust the tool? What if the documentation is right but the code is wrong?
+9. Should the AIF360 toolkit Display a warning whenever `average_odds_difference` is near zero, prompting users to check `equalized_odds_difference` as well?
+10. Is the "pull request" model of open-source sufficient for safety-critical tools, or do fairness metrics need a review process like clinical trials?
 
 ---
 
@@ -129,7 +150,58 @@ Key observations:
 
 ---
 
-## 🔴 Debate #3: The Missing-Value Contract — What Should a Fairness Tool Do When Data Is Incomplete?
+## 🔴 Debate #3: The Metrics Documentation Gap — Even the Auditors Need Auditing
+
+**Source:** [dssg/aequitas Issue #201](https://github.com/dssg/aequitas/issues/201)  
+**Project:** [Aequitas — University of Chicago](https://github.com/dssg/aequitas)  
+**Opened:** July 23, 2024  |  **Last updated:** September 29, 2025  |  **Status:** Open  
+**Labels:** Good First Issue, Base, Documentation  
+**Assignees:** reluzita, VinayakPaka, Vijaygaurav2004
+
+### The Claim
+
+Aequitas, the toolkit *built for policymakers and data scientists*, doesn't have a single clear page explaining what each of its fairness metrics actually measures. [Issue #201](https://github.com/dssg/aequitas/issues/201) asks for a dedicated README or documentation page that summarizes all available fairness metrics — yet it has been open for over a year with three contributors assigned and no clear resolution.
+
+### Why This Matters
+
+This is a **meta-documentation problem**: the tool that's supposed to help people understand fairness doesn't even fully document its own fairness metrics. If Aequitas can't clearly explain what `tpr`, `fpr`, and `pprev` mean in a fairness context, how can a policymaker trust the audit output? The irony is profound: *the fairness toolkit needs a fairness audit of its own documentation.*
+
+### Discussion Prompts
+
+1. Should a fairness toolkit be required to document its metrics in plain language — not just math?
+2. If a tool labeled "for policymakers" can't explain its own metrics, what does that say about who the tool is really for?
+3. Is a "Good First Issue" that's been open for 14 months still "good first" — or has it become a symbol of something else?
+4. Should fairness documentation be subject to the same kind of peer review as the metrics themselves?
+
+---
+
+## 🔴 Debate #4: The Versioning Trust Gap — When Breaking Changes Break Trust
+
+**Source:** [dssg/aequitas Issue #209](https://github.com/dssg/aequitas/issues/209)  
+**Project:** [Aequitas — University of Chicago](https://github.com/dssg/aequitas)  
+**Opened:** December 14, 2024  |  **Status:** Open  
+**Labels:** Bug, CLI
+
+### The Claim
+
+A user reported that the Aequitas team released new versions with **breaking changes** — changes to the CLI that would cause existing scripts and workflows to fail — without bumping the version number appropriately. For a tool used in fairness audits, this is not just an inconvenience. It's an **integrity problem**.
+
+### Why This Matters
+
+Fairness audit results are used as **evidence** — in regulatory compliance, in legal proceedings, in policy decisions. If the tool versions are not clearly tracked, you cannot reproduce an audit. If you cannot reproduce an audit, the audit is not evidence. It's just an opinion.
+
+The versioning question is really: **Can you trust an audit tool that doesn't tell you what changed?**
+
+### Discussion Prompts
+
+1. Should fairness tools follow Semantic Versioning strictly — or is a looser convention acceptable?
+2. If a fairness audit was run with version 1.0 and the tool ships version 2.0 with breaking changes, is the old audit still valid?
+3. Should audit reports be required to include the exact tool version, or is that overkill?
+4. Who is responsible when a version change causes a previously "fair" model to suddenly appear "unfair" — the tool or the auditor?
+
+---
+
+## 🔴 Debate #5: The Missing-Value Contract — What Should a Fairness Tool Do When Data Is Incomplete?
 
 **Source:** [fairlearn/fairlearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725)  
 **Project:** [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn)  
@@ -164,62 +236,31 @@ This question reveals a fundamental tension in fairness tooling:
 
 ---
 
-## 🔴 Debate #4: The SHAP Measurement Problem — Does the Denominator Change the Story?
+## 🔴 Debate #6: The Corporate Fairness Question — Whose Definition Ships by Default?
 
-**Source:** [Fair-Code Issue #672](https://github.com/yakew7/Fair-Code/issues/672)  
-**Project:** [Fair-Code](https://github.com/yakew7/Fair-Code)  
-**Status:** Open, unresolved
+**Source:** [Infosys Responsible AI Toolkit](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit)  
+**Project:** Enterprise Responsible AI Platform  
+**Status:** Open-source, actively maintained
 
 ### The Question
 
-When auditing racial bias in a COMPAS recidivism model using SHAP values, how should you report race's influence? The answer depends on a choice that isn't mentioned in the original write-up:
-
-- **Option A — Top-5 features denominator:** Race accounts for **48.1%** of the top-5 features' combined influence
-- **Option B — All-features denominator:** Race accounts for **42.3%** of all features' combined influence
-
-Both numbers are correct. They answer different questions.
+When a major IT services company builds a "Responsible AI" toolkit, whose definition of fairness becomes the default? The toolkit covers fairness, safety, security, explainability, and hallucination detection — but it also serves the company's commercial interests. Does the toolkit optimize for the fairest outcome, or for the most marketable one?
 
 ### Why It Matters
 
-The choice of denominator is a rhetorical decision disguised as a number. "Race drives 48% of the model's decisions" sounds more alarming than "race drives 42%" — but the difference isn't about the model. It's about what you want the audience to feel.
+This is the question that doesn't appear in issue threads but pervades every corporate open-source project:
 
-In a courtroom, a prosecutor would cite 48%. A defense attorney would cite 42%. A journalist would pick whichever fits the headline.
-
-### Discussion Prompts
-
-1. Is there a "correct" way to aggregate feature importance for fairness reporting?
-2. Should fairness audits standardize denominator conventions (like p-value thresholds)?
-3. Does the choice of denominator change policy outcomes — and if so, who should make that choice?
-4. Should fairness reports include both numbers, with an explanation of what each one means?
-
----
-
-## 🔴 Debate #5: The Impossibility Triangle — Which Fairness Metric Wins?
-
-**Source:** [Fair-Code Issue #665](https://github.com/yakew7/Fair-Code/issues/665)  
-**Project:** [Fair-Code](https://github.com/yakew7/Fair-Code)  
-**Status:** Ongoing
-
-### The Theorem
-
-Chouldechova (2017) and Kleinberg et al. (2016) independently proved: **when base rates differ between groups, you cannot simultaneously satisfy equalized odds and predictive parity** — except in trivial edge cases.
-
-### The Real-World Battle
-
-The COMPAS case is the canonical illustration:
-
-| Who | Metric Used | Finding |
-|---|---|---|
-| **ProPublica** | Equalized Odds (FPR parity) | Black defendants falsely flagged at 78.1% vs White at 0.3% — *unfair!* |
-| **Northpointe** | Predictive Parity (PPV parity) | PPV 62.8% vs 50.0% — *tool is not biased!* |
-
-Both were mathematically correct. They were measuring different things.
+1. **Corporate vs. community governance.** When Infosys decides which fairness metrics to include, which to prioritize, and which to deprecate, whose interests guide those decisions?
+2. **The "responsible" in Responsible AI.** Is the toolkit responsible to the people being audited, or to the organizations doing the auditing?
+3. **Open source as transparency vs. open source as strategy.** Is the toolkit open-source to enable scrutiny, or to establish Infosys's fairness definitions as industry standards?
+4. **The regulatory capture risk.** If regulators adopt a corporate toolkit's metrics as their reference, the corporation effectively writes the rules it benefits from.
 
 ### Discussion Prompts
 
-1. Should there be a "default" fairness metric for high-stakes domains — and who should set it?
-2. Is the impossibility theorem an argument against fairness metrics altogether?
-3. If you can't satisfy all metrics, whose rights should the metric protect?
+1. Should fairness metrics be governed by an independent consortium rather than a single company?
+2. Is it possible for a corporate-built tool to be genuinely "fair" — or does the power asymmetry inherently bias the output?
+3. Should regulated industries be required to use independently governed tools rather than vendor-provided ones?
+4. What would "community-governed" fairness metrics look like — and could it compete with enterprise-grade tooling?
 
 ---
 
@@ -229,9 +270,10 @@ Both were mathematically correct. They were measuring different things.
 |---|---|---|---|---|---|
 | 1 | What does "zero" mean? | AIF360 | [#528](https://github.com/Trusted-AI/AIF360/issues/528) | April 2024 | Open, unmaintained |
 | 2 | Scalar vs. intersectional breakdown | AIF360 | [#558](https://github.com/Trusted-AI/AIF360/issues/558) | January 2026 | Open, volunteer waiting |
-| 3 | Missing-value contract | FairLearn | [#1725](https://github.com/fairlearn/fairlearn/issues/1725) | September 2026 | Open, 3 comments |
-| 4 | SHAP Measurement Problem | Fair-Code | [#672](https://github.com/yakew7/Fair-Code/issues/672) | Ongoing | Open |
-| 5 | Impossibility Triangle | Fair-Code | [#665](https://github.com/yakew7/Fair-Code/issues/665) | Ongoing | Open |
+| 3 | Metrics documentation gap | Aequitas | [#201](https://github.com/dssg/aequitas/issues/201) | July 2024 | Open, 3 assignees |
+| 4 | Versioning trust gap | Aequitas | [#209](https://github.com/dssg/aequitas/issues/209) | December 2024 | Open |
+| 5 | Missing-value contract | FairLearn | [#1725](https://github.com/fairlearn/fairlearn/issues/1725) | September 2026 | Open, 3 comments |
+| 6 | Whose fairness definition? | Infosys RAI | — | — | Open-source, corporate |
 
 ---
 

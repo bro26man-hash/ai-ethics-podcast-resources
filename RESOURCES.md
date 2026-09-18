@@ -1,6 +1,6 @@
 # 📚 Open-Source Fairness Projects — Curated for the Podcast
 
-Three active, impactful projects where the theory of fairness meets the practice of auditing. Each one represents a different philosophy: comprehensive toolkit, transparent audit pipeline, and enterprise operationalization.
+Three active, impactful projects where the theory of fairness meets the practice of auditing. Each one represents a different philosophy: comprehensive toolkit, real-world audit pipeline, and enterprise-grade assurance.
 
 ---
 
@@ -42,119 +42,97 @@ Three active, impactful projects where the theory of fairness meets the practice
 
 ---
 
-## 2. [Fair-Code (by Yash Kewlani)](https://github.com/yakew7/Fair-Code)
+## 2. [Aequitas — University of Chicago (Data & Society Project)](https://github.com/dssg/aequitas)
 
 | | |
 |---|---|
-| **Stars** | ⭐ 47 |
-| **Language** | Python / HTML |
-| **License** | MIT |
-| **Last updated** | September 2026 |
-
-**What it is:** Seven complete, reproducible fairness audits across high-stakes domains: criminal justice (COMPAS), hiring, lending, healthcare, welfare eligibility, and tenant screening. Each audit ships as runnable scripts (`unfair.py` / `fair.py`) plus Jupyter notebooks. Includes an Open Dataset Profiler (web + CLI), a benchmark harness with 5 mitigation strategies (S0–S4), 6 fairness metrics with bootstrap CIs and permutation tests, and 61 plain-language explainers.
-
-**Why it matters for the podcast:** Fair-Code is the most transparently documented fairness project we found. Every audit follows the same pipeline: train a biased model → measure the fairness gap → identify proxy variables → remove them → retrain → measure again. The results are publishable-grade. The healthcare focus is distinctive — three of seven audits examine bias in medical AI, where the consequences are clinical rather than financial. The tenant screening audit delivers a devastating finding: removing race and all 12 proxy variables only cuts the fairness gap from 6.68% to 5.16%, and it stays statistically significant — because the label itself (re-arrest) is a policed quantity.
-
-**Podcast angle:** *What happens when the math itself says "you can't have it all"?*
-
-**Live debates:**
-- [Issue #672 — The SHAP Measurement Problem](https://github.com/yakew7/Fair-Code/issues/672): How should you report race's influence? The answer depends on a denominator choice (top-5 features vs. all features), which is a rhetorical decision disguised as a number.
-- [Issue #665 — The Impossibility Triangle](https://github.com/yakew7/Fair-Code/issues/665): When base rates differ, you can't satisfy equalized odds and predictive parity simultaneously.
-
-```bash
-git clone https://github.com/yakew7/Fair-Code.git
-cd Fair-Code
-pip install -r requirements.txt
-python COMPAS/unfair.py   # see the bias
-python COMPAS/fair.py     # see the fix
-```
-
----
-
-## 3. [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn)
-
-| | |
-|---|---|
-| **Stars** | ⭐ 2,286 |
+| **Stars** | ⭐ 773 |
 | **Language** | Python |
 | **License** | MIT |
 | **Last updated** | September 2026 (actively maintained) |
-| **Forks** | 516 |
+| **Forks** | 125 |
 
-**What it is:** A Python package to assess and improve fairness of machine learning models. Contains mitigation algorithms (Exponentiated Gradient, Grid Search, ThresholdOptimizer) and metrics for model assessment. Designed with scikit-learn integration for MLOps pipelines. Hosted by the Python Software Foundation.
+**What it is:** An open-source bias auditing and Fair ML toolkit designed specifically for **data scientists, ML researchers, and policymakers**. Aequitas provides an easy-to-use, transparent tool for auditing predictors of ML models and experimenting with "correcting biased models" using Fair ML methods in binary classification settings. Version 1.0.0 introduced **Aequitas Flow**, a streamlined pipeline for bias audits with mitigation.
 
-**Why it matters for the podcast:** FairLearn is the practitioner's choice — built by Microsoft, integrated with scikit-learn, and designed for production workflows. But its flagship `MetricFrame` tool only works with metrics that have the signature `metric(y_true, y_pred)`, which excludes dataset-only metrics, streaming metrics, and metrics from other domains like contextual bandits. Issue #756 — open since April 2021 with 74 comments — reveals a deep divide: should the tool be generalized (accepting flexible sample parameters) or kept simple (building new classes for new use cases)?
+**Why it matters for the podcast:** Aequitas bridges the gap between technical rigor and policy relevance. Its documentation explicitly targets policymakers, not just engineers. The COMPAS demo notebook walks through a full criminal justice audit. And its new "Flow" feature asks: can you go from detecting bias to fixing it in a single, reproducible pipeline?
 
-**Podcast angle:** *Who does the tool serve — the practitioner who wants simplicity, or the researcher who needs generality?*
+**Podcast angle:** *Can you audit an algorithm and then un-audit it — and who gets to decide what "corrected" means?*
 
-**Live debate:**
-- [Issue #1725 — MetricFrame and missing sensitive feature values](https://github.com/fairlearn/fairlearn/issues/1725): MetricFrame and `plot_roc_curve_by_group` disagree on how to handle missing sensitive feature values. This isn't just a bug; it's a philosophical question about what a fairness tool should do when the data it needs to audit is incomplete.
+**Key features:**
+- **Confusion-matrix-based metrics** per sensitive group (TPR, FPR, PPV, NPV, etc.)
+- **Bias audit summaries** with visual disparity plots
+- **Fair ML methods**: Pre-processing (Data Repairer, Label Flipping, Prevalence Sampling, Massaging, Correlation Suppression), In-processing (FairGBM, Fairlearn Classifier), Post-processing (Group Threshold, Balanced Group Threshold)
+- **Built-in datasets**: BankAccountFraud and FolkTables
+- **Hyperparameter optimization** via Optuna integration
+- **Reproducibility**: Save all experiment artifacts
 
-**Other active issues:**
-- [#1419](https://github.com/fairlearn/fairlearn/issues/1419) — Adding statistical property/integrity tests for the adversarial mitigation module (5 comments)
-- [#1417](https://github.com/fairlearn/fairlearn/issues/1417) — Replace PyTorch and TensorFlow test mocks with actual instances (4 comments)
+**Active issues:**
+- [#201 — Add a readme or page on the existing metrics of fairness](https://github.com/dssg/aequitas/issues/201): Even the project itself acknowledges that its metrics need better documentation. A "Good First Issue" assigned to multiple contributors — but still open since July 2024.
+- [#209 — Please Release New Versions When Making Breaking Changes](https://github.com/dssg/aequitas/issues/209): A user flagged that breaking changes were shipped without a new version number. Trust isn't just about code — it's about versioning.
 
 ```bash
-pip install fairlearn
-from fairlearn.metrics import MetricFrame
-# The tool that's at the center of the API design debate
+pip install aequitas
+from aequitas import Audit
+audit = Audit(df)
+audit.summary_plot(["tpr", "fpr", "pprev"])
 ```
+
+🔗 **Docs:** [dssg.github.io/aequitas](https://dssg.github.io/aequitas/)  
+🔗 **Tutorial:** [dssg.github.io/fairness_tutorial](https://dssg.github.io/fairness_tutorial/)  
+🔗 **Project site:** [dsapp.uchicago.edu/aequitas](http://dsapp.uchicago.edu/aequitas/)
 
 ---
 
-## 4. [Infosys Responsible AI Toolkit](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit)
+## 3. [Infosys Responsible AI Toolkit](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit)
 
 | | |
 |---|---|
 | **Stars** | ⭐ 310 |
 | **Language** | Python |
-| **License** | MIT |
+| **License** | Apache-2.0 |
 | **Last updated** | September 2026 (actively maintained) |
-| **Forks** | 82 |
 
-**What it is:** A modular enterprise toolkit covering fairness, bias, safety, security, privacy, explainability, and hallucination detection — for both traditional ML and LLMs. Includes fairness metrics (Statistical Parity Difference, Disparate Impact Ratio, Four-Fifths Rule, Cohen's D) and mitigation methods (Equalized Odds, Re-weighing). Ships as a full UI with micro-frontend architecture and Azure OpenAI integration.
+**What it is:** A comprehensive enterprise-grade Responsible AI toolkit from Infosys that goes beyond fairness to cover **safety, security, explainability, bias, and hallucination detection**. Designed for production ML pipelines where regulatory compliance is not optional.
 
-**Why it matters for the podcast:** Represents the *industry practice* angle — how a global IT services company operationalizes responsible AI for enterprise clients. Also one of the few toolkits that explicitly extends fairness auditing to LLMs, which is the frontier of the debate. The modular architecture (10+ separate repos under one umbrella) raises questions about whether fragmentation helps or hinders adoption.
+**Why it matters for the podcast:** This toolkit represents the "corporate" approach to AI ethics — built by a major IT services company, designed for enterprise clients who need to demonstrate compliance with the EU AI Act, NIST AI RMF, and emerging regulations. It raises a key question: when a corporation builds the fairness tooling, whose definition of "fair" ships by default?
 
-**Podcast angle:** *When fairness is a product feature — who is the customer, and who is the subject of the audit?*
+**Podcast angle:** *When Big Tech builds the fairness tools, do they build them for the people who are audited — or for the people who audit?*
 
-**Fairness-specific modules:**
-- `responsible-ai-fairness` — Core fairness & bias detection for prompts, responses, and traditional ML
-- `responsible-ai-model-detail` — Model-level fairness assessment
-- `responsible-ai-reporting-tool` — Compliance-grade fairness reporting
+**Key features:**
+- **Fairness detection** across multiple protected attributes
+- **Bias mitigation** algorithms for pre- and post-processing
+- **Explainability** module for model transparency
+- **Safety & security** checks beyond traditional fairness
+- **Hallucination detection** for generative AI systems
 
-```bash
-# Fairness metrics importable from the toolkit
-from responsible_ai_fairness import FairnessDetector
-detector = FairnessDetector(metrics=['statistical_parity', 'disparate_impact', 'equalized_odds'])
-```
+🔗 **Repo:** [Infosys/Infosys-Responsible-AI-Toolkit](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit)
 
 ---
 
 ## 📊 Comparison Matrix
 
-| | AIF360 | Fair-Code | FairLearn | Infosys RAI |
-|---|---|---|---|---|
-| **Stars** | 2,866 | 47 | 2,286 | 310 |
-| **Philosophy** | Comprehensive toolkit | Transparent audit pipeline | Practitioner-friendly API | Enterprise product suite |
-| **Maintainer** | IBM / LF AI | Solo + community | Microsoft / PSF | Infosys (commercial) |
-| **Best for** | Understanding formal metric definitions | Domain-specific audits (COMPAS, healthcare, hiring) | Production MLOps integration | Enterprise AI governance at scale |
-| **LLM support?** | No (traditional ML only) | No (traditional ML only) | Limited | Yes (prompts & responses) |
-| **Live debate** | #528 — What does "zero" mean? | #672 — Does the denominator change the story? | #1725 — What serves who? | #1725 — Enterprise vs. community? |
-| **License** | Apache-2.0 | MIT | MIT | MIT |
+| | AIF360 | Aequitas | Infosys RAI |
+|---|---|---|---|
+| **Stars** | 2,866 | 773 | 310 |
+| **Philosophy** | Comprehensive research toolkit | Policy-friendly audit pipeline | Enterprise compliance platform |
+| **Maintainer** | IBM / LF AI & Data | UChicago / Data & Society | Infosys |
+| **Best for** | Formal metric definitions & research | Policymaker-facing audits & reproducible pipelines | Enterprise regulatory compliance |
+| **Live debate** | #528 — What does "zero" mean? | #201 — Even the docs need docs | Enterprise whose fairness definition ships by default?
+| **License** | Apache-2.0 | MIT | Apache-2.0 |
 
 ---
 
 ## 🔗 Essential External Resources
 
 - [AIF360 documentation](https://aif360.readthedocs.io/en/stable/) — IBM's official metric documentation (see Issue #528 for known errors)
-- [FairLearn documentation](https://fairlearn.readthedocs.io/) — Microsoft's fairness toolkit docs
-- [Fair-Code explainers](https://www.thefaircode.xyz) — 61 plain-language fairness explainers
-- [Infosys Responsible AI Toolkit docs](https://infosys.github.io/Infosys-Responsible-AI-Toolkit/) — Enterprise documentation
+- [Aequitas documentation](https://dssg.github.io/aequitas/) — UChicago's policy-friendly audit toolkit docs
+- [Aequitas Flow paper (JMLR 2024)](https://arxiv.org/pdf/2405.05809) — "Streamlining Fair ML Experimentation"
+- [Aequitas original paper (2018)](https://arxiv.org/pdf/1811.05577.pdf) — "Aequitas: A Bias and Fairness Audit Toolkit"
+- [Infosys Responsible AI Toolkit](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit) — Enterprise-grade responsible AI
 - [AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528) — The average_odds_difference documentation bug (open since April 2024)
 - [AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558) — Extend Empirical Differential Fairness for intersectional analysis (open since January 2026)
-- [FairLearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725) — MetricFrame and missing sensitive feature values (open since September 2026)
-- [Fair-Code Issue #672](https://github.com/yakew7/Fair-Code/issues/672) — The SHAP Measurement Problem
+- [Aequitas Issue #201](https://github.com/dssg/aequitas/issues/201) — Add a readme on existing metrics (open since July 2024)
+- [Fair-Code project](https://github.com/yakew7/Fair-Code) — Seven complete, reproducible fairness audits
 - [ProPublica: Machine Bias (2016)](https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing) — The investigation that started the COMPAS debate
 - [Chouldechova (2017): Fair Prediction with Disparate Impact](https://arxiv.org/abs/1703.00056) — The impossibility theorem proof
 - [Kleinberg, Mullainasan & Raghavan (2016): Inherent Trade-offs](https://arxiv.org/abs/1609.05807) — Independent impossibility result
@@ -169,8 +147,20 @@ Each episode zooms in on a **real, unresolved controversy** from an open issue t
 
 1. **The Average-Odds Documentation Bug** (AIF360 #528) — When the most-cited fairness toolkit ships a metric docstring that misstates what "zero" means, who owns the definition? After 17 months, a volunteer offered a fix — but no maintainer has merged it.
 2. **The Intersectional Analysis Gap** (AIF360 #558) — Should fairness tools return a single scalar, or should they break down discrimination by specific group combinations? A volunteer offered to implement the enhancement.
-3. **The Missing-Value Contract** (FairLearn #1725) — Should fairness tools be strict or silent when sensitive data is missing? The way you answer this question reveals what you think a fairness tool is for.
-4. **The SHAP Measurement Problem** (Fair-Code #672) — Does the choice of denominator change the story of racial bias?
-5. **The Impossibility Triangle** (Fair-Code #665) — When two metrics give contradictory answers, whose rights should the metric protect?
+3. **The Metrics Governance Gap** (Aequitas #201) — Even Aequitas, the toolkit built for policymakers, acknowledges that its own metrics need better documentation. A "Good First Issue" open since July 2024, assigned to three contributors, still unresolved.
+4. **The Versioning Trust Gap** (Aequitas #209) — When a tool ships breaking changes without a version bump, how can anyone trust its output? Fairness audits aren't just code — they're evidence.
+5. **The Corporate Fairness Question** (Infosys RAI) — When a major IT company builds the fairness tooling, whose definition of "fair" becomes the default? Is enterprise fairness a public good or a proprietary standard?
+
+---
+
+## 💡 Listening Guide
+
+| Episode arc | Project | Issue | Core tension |
+|---|---|---|---|---|
+| *"What Does Zero Mean?"* | AIF360 | #528 | Documentation vs. mathematical reality |
+| *"The 360 That Isn't"* | AIF360 | #558 | Single scalar vs. intersectional justice |
+| *"Even the Auditors Need Auditing"* | Aequitas | #201 | Self-referential documentation gaps |
+| *"Who Version Who?"* | Aequitas | #209 | Trust, breaking changes, and evidence integrity |
+| *"The Corporate Toolkit"* | Infosys RAI | — | Whose fairness standard ships by default? |
 
 *Contributors: Add your favourite fairness project to `RESOURCES.md` — just follow the table format above and include stars, license, and a one-line pitch.*
