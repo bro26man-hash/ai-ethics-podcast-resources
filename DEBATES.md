@@ -122,7 +122,7 @@ After 74 comments over 5 months:
 
 ## Debate 3: The Intersectional Analysis Gap — Should Fairness Tools Return a Scalar or a Breakdown?
 
-**Source:** [Trusted-AI/AIF360/issues/558](https://github.com/Trusted-AI/AIF360/issues/558)
+**Source:** [Trusted-AI/AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558)
 **Project:** [IBM AIF360 — AI Fairness 360](https://github.com/Trusted-AI/AIF360)
 **Tags:** `enhancement`, `intersectionality`
 **Status:** Open since January 21, 2026 — unresolved
