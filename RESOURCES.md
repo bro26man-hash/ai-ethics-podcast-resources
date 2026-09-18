@@ -1,6 +1,6 @@
 # 📚 Open-Source Fairness Projects — Curated for the Podcast
 
-Four active, impactful projects where the theory of fairness meets the practice of auditing. Each one represents a different philosophy: comprehensive toolkit, real-world audit pipeline, enterprise-grade assurance, and community-driven API framework.
+Four active, impactful projects where the theory of fairness meets the practice of auditing. Each one represents a different philosophy: comprehensive research toolkit, general-purpose metrics framework, policy-friendly audit pipeline, and enterprise-grade assurance.
 
 ---
 
@@ -46,47 +46,33 @@ Four active, impactful projects where the theory of fairness meets the practice 
 
 | | |
 |---|---|
-| **Stars** | ⭐ 870 |
+| **Stars** | ⭐ 2,286 |
 | **Language** | Python |
 | **License** | MIT |
 | **Last updated** | September 2026 (actively maintained) |
-| **Forks** | 256 |
 
-**What it is:** A community-driven toolkit from Microsoft for assessing and improving fairness in ML systems. FairLearn centers on the `MetricFrame` object — a unified interface for computing fairness metrics disaggregated by sensitive features. It emphasizes **dependency-aware metrics** that explicitly condition fairness on underlying causal assumptions.
+**What it is:** A Python package to assess and improve fairness of machine learning models, developed at Microsoft Research. FairLearn provides both fairness metrics (via `MetricFrame`) and mitigation algorithms (pre-processing, in-processing, post-processing). It's the most actively developed open-source fairness toolkit and the one where the most fundamental API design debates are happening.
 
-**Why it matters for the podcast:** FairLearn represents the "API philosophy" approach to fairness — the question isn't just *what* to measure, but *how to structure the measurement* so it can't be misused. Its most active debate (Issue #756, 74 comments, open since April 2021) asks whether MetricFrame should support metrics beyond the standard `metric(y_true, y_pred)` signature —Dataset-only metrics, reinforcement learning metrics, and metrics for partial-observation settings like lending. The debate reveals a fundamental tension: should a fairness tool be a **general-purpose framework** or a **specialized instrument**?
+**Why it matters for the podcast:** FairLearn is where the *philosophical* debates about fairness tooling are happening in real time. Its flagship `MetricFrame` class is at the center of a 74-comment, 5-month unresolved debate ([Issue #756](https://github.com/fairlearn/fairlearn/issues/756)) about whether the API should support metrics beyond `y_true`/`y_pred` — and whether a fairness tool should be a general-purpose framework or a specialized instrument. This is the debate that powers our episode.
 
-**Podcast angle:** *When the API itself becomes a fairness decision — who should a tool serve?*
+**Podcast angle:** *When a fairness tool can't even agree on what "fairness" looks like in its own API — what hope does the rest of us have?*
 
-**Key features:**
-- **MetricFrame:** Unified fairness metric computation with group disaggregation
-- **Dependency-aware metrics:** Explicit conditioning on causal assumptions
-- **Reduction algorithms:** For translating fairness constraints into standard ML objectives
-- **Visualization utilities:** ROC curves by group, bar plots for metric comparisons
-- **Integration with scikit-learn:** Familiar API for ML practitioners
+**Key mitigation algorithms:**
+- Exponentiated Gradient (Reductions approach)
+- Grid Search (Reductions approach)
+- ThresholdOptimizer (post-processing)
+- Resampling (pre-processing)
+- Reweighing (pre-processing)
 
-**Key metrics:**
+**Key metrics (via MetricFrame):**
 - Demographic Parity Difference
 - Equalized Odds Difference
-- Predictive Parity Difference
-- Average Odds Difference
-- generalized_odds_difference
-- Theil Index
+- Accuracy Difference
+- Balanced Error Rate
+- Generalized Entropy Index
 
-**Active issues:**
-- [#756 — MetricFrame should support metrics that don't require y_true and y_pred](https://github.com/fairlearn/fairlearn/issues/756): 74 comments, 5+ years old, unresolved. Should MetricFrame be a general-purpose framework or a specialized instrument? Should arguments be keyword-only? Should `metric` become `metrics`? This is the central API design debate of the fairness tooling ecosystem.
-- [#1725 — Missing-value contract](https://github.com/fairlearn/fairlearn/issues/1725): Should fairness tools fail loudly, proceed silently, or impute when sensitive data is missing?
-
-```bash
-pip install fairlearn
-from fairlearn.metrics import MetricFrame
-mf = MetricFrame(metrics=accuracy_score, y_true=y_true, y_pred=y_pred, sensitive_features=sf)
-print(metric_frame.by_group)
-```
-
-🔗 **Docs:** [fairlearn.ai](https://fairlearn.ai/)  
-🔗 **Repo:** [github.com/fairlearn/fairlearn](https://github.com/fairlearn/fairlearn)  
-🔗 **Issue #756:** [The MetricFrame API design debate](https://github.com/fairlearn/fairlearn/issues/756)
+🔗 **Docs:** [fairlearn.readthedocs.io](https://fairlearn.readthedocs.io/en/latest/)  
+🔗 **Tutorials:** [fairlearn tutorials on GitHub](https://github.com/fairlearn/fairlearn/tree/main/examples/notebooks)
 
 ---
 
@@ -161,11 +147,11 @@ audit.summary_plot(["tpr", "fpr", "pprev"])
 
 | | AIF360 | FairLearn | Aequitas | Infosys RAI |
 |---|---|---|---|---|
-| **Stars** | 2,866 | 870 | 773 | 310 |
-| **Philosophy** | Comprehensive research toolkit | Community-driven API framework | Policy-friendly audit pipeline | Enterprise compliance platform |
-| **Maintainer** | IBM / LF AI & Data | Microsoft / community | UChicago / Data & Society | Infosys |
-| **Best for** | Formal metric definitions & research | Structured API & dependency-aware metrics | Policymaker-facing audits & reproducible pipelines | Enterprise regulatory compliance |
-| **Live debate** | #528 — What does "zero" mean? | #756 — General-purpose framework or specialized instrument? | #201 — Even the docs need docs | Enterprise whose fairness definition ships by default?
+| **Stars** | 2,866 | 2,286 | 773 | 310 |
+| **Philosophy** | Comprehensive research toolkit | General-purpose metrics framework | Policy-friendly audit pipeline | Enterprise compliance platform |
+| **Maintainer** | IBM / LF AI & Data | Microsoft Research | UChicago / Data & Society | Infosys |
+| **Best for** | Formal metric definitions & research | Flexibility & API design | Policymaker-facing audits & reproducible pipelines | Enterprise regulatory compliance |
+| **Featured debate** | #528 — What does "zero" mean? | #756 — General-purpose or specialized? | #201 — Even the docs need docs | Enterprise whose fairness definition ships by default?
 | **License** | Apache-2.0 | MIT | MIT | Apache-2.0 |
 
 ---
@@ -173,12 +159,11 @@ audit.summary_plot(["tpr", "fpr", "pprev"])
 ## 🔗 Essential External Resources
 
 - [AIF360 documentation](https://aif360.readthedocs.io/en/stable/) — IBM's official metric documentation (see Issue #528 for known errors)
-- [FairLearn documentation](https://fairlearn.ai/) — Microsoft's community-driven fairness toolkit docs
+- [FairLearn documentation](https://fairlearn.readthedocs.io/en/latest/) — Microsoft's fairness toolkit docs
+- [FairLearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756) — The MetricFrame API design debate (74 comments, unresolved since 2021)
 - [Aequitas documentation](https://dssg.github.io/aequitas/) — UChicago's policy-friendly audit toolkit docs
 - [Aequitas Flow paper (JMLR 2024)](https://arxiv.org/pdf/2405.05809) — "Streamlining Fair ML Experimentation"
 - [Aequitas original paper (2018)](https://arxiv.org/pdf/1811.05577.pdf) — "Aequitas: A Bias and Fairness Audit Toolkit"
-- [FairLearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756) — The MetricFrame API design debate (74 comments, open since April 2021)
-- [FairLearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725) — The missing-value contract
 - [Infosys Responsible AI Toolkit](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit) — Enterprise-grade responsible AI
 - [AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528) — The average_odds_difference documentation bug (open since April 2024)
 - [AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558) — Extend Empirical Differential Fairness for intersectional analysis (open since January 2026)
@@ -198,7 +183,7 @@ Each episode zooms in on a **real, unresolved controversy** from an open issue t
 
 1. **The Average-Odds Documentation Bug** (AIF360 #528) — When the most-cited fairness toolkit ships a metric docstring that misstates what "zero" means, who owns the definition? After 17 months, a volunteer offered a fix — but no maintainer has merged it.
 2. **The Intersectional Analysis Gap** (AIF360 #558) — Should fairness tools return a single scalar, or should they break down discrimination by specific group combinations? A volunteer offered to implement the enhancement.
-3. **The MetricFrame API Design Debate** (FairLearn #756) — Should a fairness tool be a general-purpose framework that handles any kind of metric, or a specialized instrument built only for classification? 74 comments, 5+ years, unresolved. The answer determines who the tool serves: researchers who need flexibility, or practitioners who need simplicity.
+3. **The MetricFrame API Design Debate** (FairLearn #756) — 74 comments, 5 months, unresolved. Should a fairness tool be a general-purpose framework supporting metrics for bandits, cost-sensitive learning, and streaming data — or a specialized instrument that does one thing well? The answer determines who the tool serves: researchers, practitioners, or the communities being audited.
 4. **The Metrics Governance Gap** (Aequitas #201) — Even Aequitas, the toolkit built for policymakers, acknowledges that its own metrics need better documentation. A "Good First Issue" open since July 2024, assigned to three contributors, still unresolved.
 5. **The Versioning Trust Gap** (Aequitas #209) — When a tool ships breaking changes without a version bump, how can anyone trust its output? Fairness audits aren't just code — they're evidence.
 6. **The Corporate Fairness Question** (Infosys RAI) — When a major IT company builds the fairness tooling, whose definition of "fair" becomes the default? Is enterprise fairness a public good or a proprietary standard?
@@ -211,7 +196,7 @@ Each episode zooms in on a **real, unresolved controversy** from an open issue t
 |---|---|---|---|
 | *"What Does Zero Mean?"* | AIF360 | #528 | Documentation vs. mathematical reality |
 | *"The 360 That Isn't"* | AIF360 | #558 | Single scalar vs. intersectional justice |
-| *"Framework vs. Instrument"* | FairLearn | #756 | General-purpose API vs. specialized tool |
+| *"The API Is the Argument"* | FairLearn | #756 | General-purpose framework vs. specialized instrument |
 | *"Even the Auditors Need Auditing"* | Aequitas | #201 | Self-referential documentation gaps |
 | *"Who Version Who?"* | Aequitas | #209 | Trust, breaking changes, and evidence integrity |
 | *"The Corporate Toolkit"* | Infosys RAI | — | Whose fairness standard ships by default? |

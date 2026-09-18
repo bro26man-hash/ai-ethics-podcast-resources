@@ -17,7 +17,7 @@ Real controversies happening in real repos. Each entry is based on an actual ope
 
 **AndreFCruz**, a developer and external contributor, filed an issue arguing that the `average_odds_difference` metric in AIF360 is **mathematically misdocumented**. The [API docstring](https://aif360.readthedocs.io/en/stable/modules/generated/aif360.metrics.ClassificationMetric.html) states:
 
-> *"A value of 0 indicates equality of odds."*
+> *"A value of 0 indicates equality of odds."
 
 Andre says this is **false**. He provides a visualization (attached to the issue) showing that there exist pairs of ROC curves where `average_odds_difference = 0` but **equalized odds do not hold**. The error, he points out, is not just in the AIF360 documentation — it also appears on **IBM's own fairness metrics webpage**.
 
@@ -94,7 +94,7 @@ For most practitioners, the docstring IS the fairness definition. They don't rea
 6. Is a volunteer-submitted fix with no maintainer merge pathway actually authoritative?
 7. Should fairness tool maintainers be required to respond to issues within a certain timeframe? What would that look like?
 8. If the documentation is wrong but the code is right, should you trust the tool? What if the documentation is right but the code is wrong?
-9. Should the AIF360 toolkit display a warning whenever `average_odds_difference` is near zero, prompting users to check `equalized_odds_difference` as well?
+9. Should the AIF360 toolkit Display a warning whenever `average_odds_difference` is near zero, prompting users to check `equalized_odds_difference` as well?
 10. Is the "pull request" model of open-source sufficient for safety-critical tools, or do fairness metrics need a review process like clinical trials?
 
 ---
@@ -150,106 +150,109 @@ Key observations:
 
 ---
 
-## 🔴 Debate #3: The MetricFrame API Design Debate — Framework or Instrument? Who Should a Fairness Tool Serve?
+## 🔴 Debate #3: The MetricFrame API Design Debate — General-Purpose Framework or Specialized Instrument?
 
 **Source:** [fairlearn/fairlearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756)  
 **Project:** [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn)  
-**Opened:** April 22, 2021  |  **Last updated:** September 2026  |  **Status:** Open  |  **👍 Reactions:** 1 heart  |  **💬 Comments:** 74  
+**Opened:** April 22, 2021  |  **Last updated:** September 1, 2021 (+ subsequent comments through 2026)  |  **Status:** Open  |  **💬 Comments:** 74  
 **Labels:** API  
-**Issue author:** [MiroDudik](https://github.com/MiroDudik) (FairLearn maintainer, Microsoft Research)
+**Issue author:** [MiroDudik](https://github.com/MiroDudik) (FairLearn co-creator, Microsoft Research)
 
-### The Question
+### The Core Question
 
-`MetricFrame` is the core object in FairLearn — it's how practitioners compute fairness metrics disaggregated by sensitive features. But right now it only works with metrics that have the signature `metric(y_true, y_pred)`. This excludes:
+FairLearn's `MetricFrame` class — its flagship API for computing disaggregated fairness metrics — only supports metrics with the signature `metric(y_true, y_pred)`. But fairness metrics are NOT all classification metrics. The issue, filed by MiroDudik (one of FairLearn's creators), asks:
 
-1. **Dataset-only or prediction-only metrics** — metrics of the form `metric(y_true)` or `metric(y_pred)` that don't need both.
-2. **Metrics for settings beyond classification** — for example, contextual bandit algorithms where the metric signature is `metric(actions, rewards, propensities)`, which comes up in lending settings where you only observe repayment (reward) for the specific loan type (action) you provided.
+> *Should MetricFrame support metrics that don't require y_true and y_pred?*
 
-MiroDudik, a FairLearn maintainer at Microsoft Research, proposed a two-step fix:
+This is not a minor API polish request. It's a **fundamental disagreement about what a fairness tool should be**.
 
-**Step 1:** Make all `MetricFrame` arguments keyword-only, and rename `metric` → `metrics` (for consistency with pandas `columns` and the plural nature of the argument):
+### The Two-Step Proposal
 
+MiroDudik proposed two changes:
+
+**Step 1 — Make all arguments keyword-only:**
 ```python
-# Current:
+# Current API:
 MetricFrame(metric, y_true, y_pred, *, sensitive_features, control_features=None, sample_params=None)
 
 # Proposed:
 MetricFrame(*, metrics, y_true=None, y_pred=None, sensitive_features, control_features=None, sample_params=None)
 ```
 
-**Step 2:** Allow flexible names for shared sample parameters using `**shared_sample_params`:
+Making `y_true` and `y_pred` optional would allow metrics that don't need them — like dataset-only metrics (demographic parity) or streaming metrics.
 
+**Step 2 — Allow flexible sample parameters:**
 ```python
-# Proposed:
 MetricFrame(*, metrics, sensitive_features, control_features=None, sample_params=None, **shared_sample_params)
 ```
 
-This would let any metric function receive the parameters it needs without being constrained to `y_true` and `y_pred`.
+This would let any metric receive any parameter it needs — `y_score`, `costs`, `actions_taken`, `rewards`, `propensities` — without needing wrapper functions or dummy variables.
 
-### The 74-Comment Debate
+### The Resistance
 
-The thread has been running for **5+ years** and remains unresolved. The core disagreement:
+The debate that followed revealed a deep fault line in the fairness tooling community:
 
-**MiroDudik's position (Flexibility):**
-- The current API is "really limiting us"
-- Keyword-only args let you skip parameters you don't need (e.g., drop `y_true`/`y_pred` entirely for dataset-only metrics)
-- Deprecation warnings would ease the transition
-- TheRename from `metric` → `metrics` makes sense for consistency
-- `**shared_sample_params` follows the pattern of `y_true`/`y_pred` and can be inspected for conflicts
+**riedgar-ms** (MetricFrame's original author): *"I would prefer to keep MetricFrame as it is — doing a fairly simple thing well — and work out the best API for a new use case from a clean sheet."*
 
-**riedgar-ms's position (Stability & Simplicity):**
-- Breaking existing code is "not a good thing to do" even if usage is low
-- `**kwargs` makes it impossible to add new named arguments later (you'll inevitably clash with a user's parameter name)
-- Prefer a `shared_sample_params` **dictionary** over `**kwargs`
-- The maintainerlm's position (Clarity for Novice Users):
-- `MetricFrame` should stay focused on classification/regression metrics — that's what most users need
-- Creating separate classes (`SupervisedMetricFrame`, `UnsupervisedMetricFrame`, `ReinforcementMetricFrame`) might be cleaner than one overloaded framework
-- The current signature is "very intuitive"
-- Without 3-5 concrete examples showing the new API in action, the benefit isn't visible
+**hildeweerts**: *"I am afraid that trying to fit all different kinds of learning tasks into one MetricFrame will become extremely confusing for novice users."*
 
-### Why This Matters Beyond the API
+**romanlutz**: *"If we move to `**shared_sample_params` then we better have extremely good documentation. Reading this in an API documentation I would have no clue what to do with that."*
 
-This debate is **the central design question of fairness tooling**: should a fairness tool be a **general-purpose framework** that can accommodate any measurement paradigm, or a **specialized instrument** optimized for a well-defined task?
+**riedgar-ms again**: *"I'm not keen on accepting `**kwargs` in a function signature. It means that if we ever want to add new arguments, we're going to break someone."*
 
-The answer determines who the tool serves:
+### The Concrete Scenarios
 
-1. **Researchers** who need to plug in novel metrics from cutting-edge papers → they need flexibility (Step 1 + Step 2)
-2. **Practitioners** building production fairness pipelines → they need a stable, predictable API they can depend on
-3. **Policymakers and auditors** who need reproducible, comparable results → they need the API to be stable enough that audits can be reproduced across tool versions
-4. **Novice users** learning fairness for the first time → they need an API that doesn't require understanding `**kwargs` and `inspect.signature()` to use
+MiroDudik responded with four real-world scenarios that the current API can't handle cleanly:
 
-The deeper tension: **every design choice is a value judgment about who matters most.** Making the API more flexible makes it harder for novices. Keeping it simple excludes researchers working on new measurement paradigms. And the maintainers themselves don't agree — which means the tool's design reflects a **genuine unresolved community debate**, not a top-down decision.
+1. **Classification + scoring metrics together**: You want to evaluate both accuracy AND ROC-AUC on the same disaggregated dataset. Currently you need lambda wrappers.
+2. **Multiple models in one frame**: Comparing 3 models' accuracy across sensitive groups. Currently you need different lambda wrappers per model.
+3. **Streaming metrics**: Online fairness monitoring where data arrives incrementally. `y_true` and `y_pred` start as empty lists.
+4. **Metrics beyond classification**: Cost-sensitive learning (parameters: `costs`, `y_pred`) and contextual bandits (parameters: `actions_taken`, `rewards`, `propensities`). Currently you need dummy `y_true`/`y_pred` just to pass the right parameters.
 
-### The Structural Pattern
+### The Compromise — and Why It's Still Unresolved
 
-This debate echoes across the entire fairness tooling ecosystem:
+After 74 comments, the closest thing to consensus was:
 
-- **AIF360 #528**: Volunteer offers fix, maintainer doesn't merge → the maintainers control what "fairness" means
-- **AIF360 #558**: Volunteer offers intersectional enhancement, maintainer doesn't merge → the maintainers control the granularity of fairness
-- **FairLearn #756**: Maintainer proposes flexible API, other maintainers resist → even within a single project, there's no consensus on who the tool serves
+- Make arguments keyword-only (with deprecation warnings)
+- Add `shared_sample_params` as a **dictionary** (not `**kwargs`)
+- Keep `y_true` and `y_pred` as required (riedgar-ms' preferred position)
 
-The pattern: **the people who build fairness tools are not the same people who decide what fairness means.** And the people who need fairness tools most are often the least represented in the design decisions.
+But even this modest compromise has sat unresolved for **5+ years**. The issue was last updated in 2026.
+
+### Why This Debate Matters for the Podcast
+
+This is not just about Python syntax. The API design question **encodes a philosophical position** about what fairness tooling is for:
+
+1. **General-purpose vs. specialized**: Should a fairness toolkit try to support every possible evaluation scenario (bandits, streaming, cost-sensitive, NLP, vision), or should it do classification/regression metrics really well and let other tools handle the rest?
+
+2. **Who does the tool serve?** If you're a researcher working on Fairness in reinforcement learning, the current MetricFrame is useless to you. You have to write wrapper functions that hide the fact that you're not doing classification. The API assumes the user is a classification practitioner.
+
+3. **The elegance vs. flexibility tradeoff**: riedgar-ms and hildeweerts argue for simplicity — a clean API that novices can understand. MiroDudik argues for flexibility — a general API that researchers can extend. This is the same tension that runs through all of software design, but in fairness tooling it has real consequences: if the tool can't express your fairness question, your question doesn't exist.
+
+4. **The maintainer gap**: MiroDudik is a FairLearn co-creator. riedgar-ms is the original author. Neither is a current maintainer. The debate has been running for 5 years without resolution. Who decides what FairLearn becomes?
+
+5. **The "**kwargs" question as a fairness question**: riedgar-ms's objection to `**kwargs` — "if we ever want to add new arguments, we're going to break someone" — is really about **backward compatibility as a form of stability**. If fairness tools keep changing their APIs, can audit results ever be reproducible? This is the same concern as Aequitas' versioning issue (Debate #5), but from the opposite direction: FairLearn is too conservative, Aequitas is too aggressive.
 
 ### Two Competing Narratives
 
-**Narrative A — "A general-purpose framework is the right goal"**
-Fairness measurement is a young field. Today's novel metric is tomorrow's standard. If MetricFrame can't adapt, it becomes legacy infrastructure. The `**kwargs` approach with `inspect.signature()` conflict detection is pragmatic — it supports flexibility while catching errors early.
+**Narrative A — "Keep it simple, do one thing well"**
+FairLearn's core use case is classification and regression fairness. The API is clean, intuitive, and well-documented. Expanding it to support bandits, streaming, and cost-sensitive learning would make it confusing for the majority of users who just want to check demographic parity and equalized odds. Other tools can handle those cases.
 
-**Narrative B — "A specialized instrument is more trustworthy"**
-When a tool is simple, its behavior is predictable. When its behavior is predictable, audits are reproducible. When audits are reproducible, they can serve as evidence. A general-purpose framework is an instrument that can do everything → which means it does nothing with full confidence. The scikit-learn API is familiar to millions; breaking that familiarity has real costs.
+**Narrative B — "A fairness tool should be able to express any fairness question"**
+If FairLearn can't evaluate fairness in contextual bandits or cost-sensitive settings, it's implicitly saying those settings don't matter. The real world of fairness isn't just binary classification — it's lending decisions under partial observability, healthcare resource allocation, content recommendation. A generality gap in the tool is a justice gap.
 
 ### Discussion Prompts for the Episode
 
-1. Should a fairness tool be a general-purpose framework or a specialized instrument? What are the trade-offs?
-2. Is API stability more important than flexibility in safety-critical tools?
-3. Who should design fairness APIs — the researchers who create new metrics, the engineers who deploy models, or the communities being audited?
-4. Does the `**kwargs` vs. explicit-parameters debate reflect a deeper tension between academic freedom and production reliability?
-5. If a fairness tool can't handle a novel metric from a paper published last month, does that limit what "fairness" can mean?
-6. Should fairness tooling maintainers be required to reach consensus before shipping API changes? What would that process look like?
-7. The FairLearn #756 debate has 74 comments and has been open for 5+ years. Does an unresolved API debate mean the project is stuck — or that it's honestly grappling with a hard question?
-8. Should `MetricFrame` be broken into specialized classes (supervised, unsupervised, reinforcement)? Or is that over-engineering?
-9. Who bears the cost when API changes break existing audits? The practitioner who re-runs a compliance audit and gets different numbers?
-10. If you were designing a fairness API from scratch, knowing what you know now about the #756 debate, what would you build?
+1. Should a fairness tool be a general-purpose metrics framework or a specialized instrument? What's the right balance?
+2. Does the API design of a fairness tool encode a philosophical assumption about what fairness is? What assumptions does MetricFrame's `y_true, y_pred` signature encode?
+3. If a fairness tool can't evaluate your specific use case (bandits, streaming, NLP), is fairness "not applicable" to your domain — or is the tool insufficient?
+4. How should open-source fairness projects balance backward compatibility with innovation? Should breaking changes ever be allowed?
+5. Who should decide the direction of an open-source fairness tool — the original authors, current maintainers, the community, or a governance board?
+6. Is 5 years without resolving a core API question a sign of healthy deliberation or governance failure?
+7. Should fairness tools have a formal specification (like an RFC or an API contract) before implementation, the way HTTP and TCP do?
+8. If a researcher can't express their fairness question in the tool's API, does that question effectively not exist in the field?
+9. How do we prevent fairness tooling from being designed by and for a single subfield (classification) while ignoring other domains?
+10. Is the "extension" pattern (wrappers, lambda functions, custom classes) sufficient, or should the core API be redesigned?
 
 ---
 
@@ -278,42 +281,7 @@ This is a **meta-documentation problem**: the tool that's supposed to help peopl
 
 ---
 
-## 🔴 Debate #5: The Missing-Value Contract — What Should a Fairness Tool Do When Data Is Incomplete?
-
-**Source:** [fairlearn/fairlearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725)  
-**Project:** [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn)  
-**Opened:** September 9, 2026  |  **Last updated:** September 16, 2026  |  **Status:** Open  |  **💬 Comments:** 3  
-**Issue author:** [aiedwardyi](https://github.com/aiedwardyi)
-
-### The Question
-
-`MetricFrame` and `plot_roc_curve_by_group` handle missing sensitive feature values differently. When the data doesn't include race, gender, or another protected attribute, should the tool:
-
-- **Option A — Fail loudly** and tell the user "you can't compute fairness without knowing who's in the group"?
-- **Option B — Proceed silently** and compute what it can, perhaps with a warning?
-- **Option C — Impute or estimate** the missing values using statistical methods?
-
-The disagreement between MetricFrame and the ROC curve plotting function suggests that FairLearn's own maintainers haven't agreed on the answer.
-
-### Why It Matters
-
-This question reveals a fundamental tension in fairness tooling:
-
-1. **Strictness vs. usability.** A strict tool that refuses to run without complete data is more principled but less useful in the real world, where data is often messy.
-2. **Silence vs. transparency.** If a tool proceeds silently with missing data, the user might not realize the fairness assessment is incomplete. If it warns, the user might ignore the warning.
-3. **Who bears the risk?** If a tool imputes missing values and gets it wrong, whose responsibility is the error? The tool developer? The data scientist? The regulator who accepted the tool's output?
-4. **The philosophical question underneath.** A fairness tool requires sensitive data to detect bias. But in many contexts (hiring, lending, healthcare), collecting sensitive data is itself controversial. The tool's approach to missing data reveals its assumptions about whether fairness can be assessed without explicit group membership — and that's a political question, not a technical one.
-
-### Discussion Prompts
-
-1. Should fairness tools be strict or silent when sensitive data is missing?
-2. Is it ethical for a fairness tool to produce an incomplete assessment without clearly flagging the gap?
-3. Can you measure fairness without knowing who's being measured — and should you try?
-4. Who decides what constitutes "missing" data? Is race missing because it wasn't collected, or because it was deliberately excluded?
-
----
-
-## 🔴 Debate #6: The Versioning Trust Gap — When Breaking Changes Break Trust
+## 🔴 Debate #5: The Versioning Trust Gap — When Breaking Changes Break Trust
 
 **Source:** [dssg/aequitas Issue #209](https://github.com/dssg/aequitas/issues/209)  
 **Project:** [Aequitas — University of Chicago](https://github.com/dssg/aequitas)  
@@ -336,6 +304,41 @@ The versioning question is really: **Can you trust an audit tool that doesn't te
 2. If a fairness audit was run with version 1.0 and the tool ships version 2.0 with breaking changes, is the old audit still valid?
 3. Should audit reports be required to include the exact tool version, or is that overkill?
 4. Who is responsible when a version change causes a previously "fair" model to suddenly appear "unfair" — the tool or the auditor?
+
+---
+
+## 🔴 Debate #6: The Missing-Value Contract — What Should a Fairness Tool Do When Data Is Incomplete?
+
+**Source:** [fairlearn/fairlearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725)  
+**Project:** [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn)  
+**Opened:** September 9, 2026  |  **Last updated:** September 16, 2026  |  **Status:** Open  |  **💬 Comments:** 3  
+**Issue author:** [aiedwardyi](https://github.com/aiedwardyi)
+
+### The Question
+
+`MetricFrame` and `plot_roc_curve_by_group` handle missing sensitive feature values differently. When the data doesn't include race, gender, or another protected attribute, should the tool:
+
+- **Option A — Fail loudly** and tell the user "you can't compute fairness without knowing who's in the group"?
+- **Option B — Proceed silently** and compute what it can, perhaps with a warning?
+- **Option C — Impute or estimate** the missing values using statistical methods?
+
+The disagreement between MetricFrame and the ROC curve plotting function suggests that Fairlearn's own maintainers haven't agreed on the answer.
+
+### Why It Matters
+
+This question reveals a fundamental tension in fairness tooling:
+
+1. **Strictness vs. usability.** A strict tool that refuses to run without complete data is more principled but less useful in the real world, where data is often messy.
+2. **Silence vs. transparency.** If a tool proceeds silently with missing data, the user might not realize the fairness assessment is incomplete. If it warns, the user might ignore the warning.
+3. **Who bears the risk?** If a tool imputes missing values and gets it wrong, whose responsibility is the error? The tool developer? The data scientist? The regulator who accepted the tool's output?
+4. **The philosophical question underneath.** A fairness tool requires sensitive data to detect bias. But in many contexts (hiring, lending, healthcare), collecting sensitive data is itself controversial. The tool's approach to missing data reveals its assumptions about whether fairness can be assessed without explicit group membership — and that's a political question, not a technical one.
+
+### Discussion Prompts
+
+1. Should fairness tools be strict or silent when sensitive data is missing?
+2. Is it ethical for a fairness tool to produce an incomplete assessment without clearly flagging the gap?
+3. Can you measure fairness without knowing who's being measured — and should you try?
+4. Who decides what constitutes "missing" data? Is race missing because it wasn't collected, or because it was deliberately excluded?
 
 ---
 
@@ -373,10 +376,10 @@ This is the question that doesn't appear in issue threads but pervades every cor
 |---|---|---|---|---|---|
 | 1 | What does "zero" mean? | AIF360 | [#528](https://github.com/Trusted-AI/AIF360/issues/528) | April 2024 | Open, unmaintained |
 | 2 | Scalar vs. intersectional breakdown | AIF360 | [#558](https://github.com/Trusted-AI/AIF360/issues/558) | January 2026 | Open, volunteer waiting |
-| 3 | Framework vs. instrument (API design) | FairLearn | [#756](https://github.com/fairlearn/fairlearn/issues/756) | April 2021 | Open, 74 comments, unresolved |
-| 4 | Missing-value contract | FairLearn | [#1725](https://github.com/fairlearn/fairlearn/issues/1725) | September 2026 | Open, 3 comments |
-| 5 | Metrics documentation gap | Aequitas | [#201](https://github.com/dssg/aequitas/issues/201) | July 2024 | Open, 3 assignees |
-| 6 | Versioning trust gap | Aequitas | [#209](https://github.com/dssg/aequitas/issues/209) | December 2024 | Open |
+| 3 | General-purpose vs. specialized API | FairLearn | [#756](https://github.com/fairlearn/fairlearn/issues/756) | April 2021 | Open, 5+ years unresolved |
+| 4 | Metrics documentation gap | Aequitas | [#201](https://github.com/dssg/aequitas/issues/201) | July 2024 | Open, 3 assignees |
+| 5 | Versioning trust gap | Aequitas | [#209](https://github.com/dssg/aequitas/issues/209) | December 2024 | Open |
+| 6 | Missing-value contract | FairLearn | [#1725](https://github.com/fairlearn/fairlearn/issues/1725) | September 2026 | Open, 3 comments |
 | 7 | Whose fairness definition? | Infosys RAI | — | — | Open-source, corporate |
 
 ---
