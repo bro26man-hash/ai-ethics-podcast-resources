@@ -1,118 +1,66 @@
-# 📚 Open-Source Fairness & Bias Auditing Resources
+# 📚 Open-Source Resources: Algorithmic Fairness & Bias Auditing
 
-A curated catalog of **active open-source projects** related to algorithmic fairness, bias auditing, and AI ethics — tracked for the *AI Ethics & Social Justice* podcast.
+A curated collection of **active, well-maintained open-source projects** working on the harder problems of AI fairness — researched for the *AI Ethics & Social Justice* podcast.
 
 ---
 
-## 🏆 Featured Projects (Episode Research)
+## 🏆 Key Projects (Episode Research)
 
-### 1. [AIF360 — IBM Research (Trusted-AI)](https://github.com/Trusted-AI/AIF360) — *Comprehensive Fairness Metric Toolkit*
+### 1. AI Fairness 360 (AIF360) — Trusted-AI / IBM Research
 
-| | |
-|---|---|
-| **Stars** | 2,866 ⭐ |
-| **Language** | Python (also R) |
-| **License** | Apache 2.0 |
-| **Last Updated** | September 2026 |
-| **Maintainer** | IBM Research (Trusted-AI org) |
+- **Repo:** https://github.com/Trusted-AI/AIF360
+- **Stars:** ⭐ 2,866
+- **Language:** Python (also R)
+- **License:** Apache-2.0
+- **Last active:** September 2026
 
-**What it does:** A comprehensive set of fairness metrics for datasets and machine learning models, with explanations for each metric and algorithms to mitigate bias. Covers over 20 fairness metrics across multiple categories: group fairness (demographic parity, equalized odds, predictive parity), individual fairness, and causal fairness. Includes bias mitigation algorithms for pre-processing, in-processing, and post-processing.
+**What it does:** A comprehensive toolkit with metrics for detecting bias in datasets and models, explanations for those metrics, and algorithms to mitigate bias across the AI lifecycle. Covers 15+ mitigation algorithms from pre-processing (reweighing, optimized preprocessing) through in-processing (adversarial debiasing) to post-processing (equalized odds, calibrated equalized odds).
 
-**Why it matters for the podcast:** AIF360 is the most widely deployed fairness toolkit in production ML pipelines. Its metric definitions are the de facto standard for fairness auditing in enterprise and government contexts. When the tool itself mislabels a metric — as in **Issue #528** (see `DEBATES.md`) — the stakes are not academic: courts and regulators reference these definitions.
-
-**Key feature:** The `ClassificationMetric` class provides a unified API for computing fairness metrics, but as Issue #528 reveals, the documentation for `average_odds_difference` misrepresents what "zero" means.
-
-**Active issues:**
-- [#528](https://github.com/Trusted-AI/AIF360/issues/528) — `average_odds_difference` docstring wrongly claims "equality of odds" (open since April 2024, 2 👍)
-- [#558](https://github.com/Trusted-AI/AIF360/issues/558) — Extend Empirical Differential Fairness metric (open since Jan 2026)
-- [#548](https://github.com/Trusted-AI/AIF360/issues/548) — AI Fairness 360 website is down (open since Feb 2025, 7 comments)
-- [#526](https://github.com/Trusted-AI/AIF360/issues/526) — Memory Management Issue in ClassificationMetric (open since April 2024)
+**Why it matters for the podcast:** AIF360 is one of the most widely cited fairness toolkits in the world, built at IBM Research. It's also the site of two active debates that define the core tensions in this space:
+- **[Issue #528](https://github.com/Trusted-AI/AIF360/issues/528)** — Does the `average_odds_difference` metric's documentation misleadingly claim "a value of 0 indicates equality of odds" when it doesn't? (See DEBATES.md)
+- **[Issue #558](https://github.com/Trusted-AI/AIF360/issues/558)** — Should the Empirical Differential Fairness metric return just a single scalar, or should it break down which specific group combinations drive discrimination? (See DEBATES.md)
 
 ```bash
 pip install aif360
 from aif360.metrics import ClassificationMetric
-# See metric definitions and use examples in the docs
 ```
-
-**Podcast angle:** When the most-cited fairness toolkit ships with a documentation error about what "zero" means, who catches it — and who decides what the number means?
 
 ---
 
-### 2. [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn) — *Fairness Assessment & Mitigation*
+### 2. Fairlearn — Microsoft
 
-| | |
-|---|---|
-| **Stars** | 2,286 ⭐ |
-| **Language** | Python |
-| **License** | MIT |
-| **Last Updated** | September 2026 |
-| **Maintainer** | Microsoft (fairlearn org) |
+- **Repo:** https://github.com/fairlearn/fairlearn
+- **Stars:** ⭐ 2,286
+- **Language:** Python
+- **License:** MIT
+- **Last active:** September 2026
 
-**What it does:** A Python package to assess and improve the fairness of machine learning models. Supports key fairness metrics (demographic parity, equalized odds, predictive parity, etc.) and mitigation algorithms (thresholding, re-weighting, adversarial debiasing). Designed for integration with scikit-learn workflows.
+**What it does:** A Python package that empowers developers to assess and improve fairness of ML models. Defines fairness in terms of *harms* — allocation harms (withholding opportunities) and quality-of-service harms (uneven system performance). Provides both assessment metrics and mitigation algorithms designed for scikit-learn workflows.
 
-**Why it matters for the podcast:** FairLearn is Microsoft's answer to AIF360 — same core metrics, different design philosophy. Where AIF360 is an IBM Research project with academic roots, FairLearn is built for practical ML pipelines inside Microsoft's ecosystem. The two toolkits sometimes define and compute the same metrics slightly differently, raising the question: **if two mainstream fairness tools disagree on a metric's definition, which one is "right"?**
+**Why it matters for the podcast:** Fairlearn explicitly frames fairness as a **sociotechnical challenge**, not just a mathematical one. Its documentation states plainly that "many aspects of fairness, such as justice and due process, are not captured by quantitative fairness metrics." It's also the site of an active debate about whether fairness tools should be strict (raise errors on missing data) or permissive (silently skip rows) — see [FairLearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725).
 
-** 🔴 Live Debate:** See [FairLearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725) — MetricFrame and `plot_roc_curve_by_group` disagree on how to handle missing sensitive feature values. One raises `ValueError`, the other silently drops rows. This is a real-time argument about whether fairness tools should be strict or permissive — and it's unresolved.
-
-**Run it locally:**
 ```bash
 pip install fairlearn
-from fairlearn.metrics import MetricFrame, plot_roc_curve_by_group
-# See the missing-value disagreement in Issue #1725
+from fairlearn.metrics import MetricFrame
 ```
-
-**Podcast angle:** When the same toolkit has two different behaviors for missing data — one strict, one silent — which behavior should "fairness" enforce? Does a strict `ValueError` protect users from invisible bias, or does it block legitimate analyses where missing data is the norm?
 
 ---
 
-### 3. [Aequitas — DSG (Data & Society Project)](https://github.com/dssg/aequitas) — *Bias Auditing & Fair ML Toolkit*
+### 3. Infosys Responsible AI Toolkit — Infosys
 
-| | |
-|---|---|
-| **Stars** | 773 ⭐ |
-| **Language** | Python |
-| **License** | MIT |
-| **Last Updated** | September 2026 |
-| **Maintainer** | DSG (Data & Society Project), University of Toronto |
+- **Repo:** https://github.com/Infosys/Infosys-Responsible-AI-Toolkit
+- **Stars:** ⭐ 310
+- **Language:** Python
+- **License:** MIT
+- **Last active:** September 2026
 
-**What it does:** A bias auditing and fairness toolkit designed for machine learning practitioners and domain experts. Provides group fairness metrics, bipartite ranking metrics, and intersectional analysis. Includes built-in datasets (Compas, Adult, etc.) and Jupyter notebook tutorials. Version 1.0.0 introduced "Aequitas Flow" — a streamlined experiment framework for bias mitigation.
+**What it does:** A broader enterprise platform for responsible AI, covering safety, security, privacy, explainability, fairness/bias detection, and hallucination detection for both LLMs and traditional ML models. Includes a Fairness & Bias module with statistical parity difference, disparate impact ratio, four-fifths rule, and Cohen's D for detection; equalized odds and re-weighing for mitigation.
 
-**Why it matters for the podcast:** Aequitas was built from the ground up for **audit contexts** — not just model evaluation, but end-to-end fairness auditing with documentation and reporting. Its design assumes the auditor is a *practitioner* who needs to produce evidence, not just a researcher who needs a metric. This raises a distinct question: **should fairness tools be designed for auditors (evidence-grade) or for researchers (experiment-grade)?**
-
-**Key feature:** The `get_disparity_predefined_group()` function allows auditors to test specific hypotheses about disparities, but as [Issue #86](https://github.com/dssg/aequitas/issues/86) shows, even core functions can break with unexpected errors — raising questions about reliability in production audits.
-
-```bash
-pip install aequitas
-from aequitas.group import Group
-# Run group fairness audits built for evidence production
-```
-
-**Podcast angle:** Aequitas bridges the gap between academic fairness research and real-world auditing. But when its own documentation has open gaps ([Issue #201](https://github.com/dssg/aequitas/issues/201) — "Add a readme or page on the existing metrics of fairness"), it mirrors the same documentation crisis seen in AIF360.
-
----
-
-### 4. [Infosys Responsible AI Toolkit](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit) — *Enterprise Responsible AI Platform*
-
-| | |
-|---|---|
-| **Stars** | 310 ⭐ |
-| **Language** | Python |
-| **License** | MIT |
-| **Last Updated** | September 2026 |
-| **Maintainer** | Infosys |
-
-**What it does:** A comprehensive enterprise platform for responsible AI, covering safety, security, privacy, explainability, fairness/bias detection, and hallucination detection for both LLMs and traditional ML models. Includes a Fairness & Bias module with statistical parity difference, disparate impact ratio, four-fifths rule, and Cohen's D for detection; equalized odds and re-weighing for mitigation. Optimized for Azure OpenAI.
-
-**Why it matters for the podcast:** This toolkit represents the **enterprise/commercial approach** to responsible AI — full-suite, API-driven, designed for organizational compliance rather than individual research. It raises a different question from the academic toolkits: **when fairness is bundled with safety, privacy, and security as part of a commercial product, does the fairness component get shortchanged?** The fairness module is one of nine modules in a larger platform, which means its depth may be limited by the platform's commercial priorities.
-
-**Key feature:** The toolkit provides common fairness metrics (Statistical Parity Difference, Disparate Impact Ratio, Four-Fifths Rule, Cohen's D) and mitigation methods (Equalized Odds, Re-weighing), but the metric coverage is narrower than AIF360's 20+ metrics.
+**Why it matters for the podcast:** This toolkit represents the **enterprise/commercial approach** to responsible AI — full-suite, API-driven, designed for organizational compliance. It raises a distinct question from the academic toolkits: **when fairness is bundled with safety, privacy, and security as part of a commercial product, does the fairness component get shortchanged?** The metric coverage is narrower than AIF360's 20+ metrics.
 
 ```bash
 pip install responsible-ai-fairness
-# Fairness & Bias detection for LLM prompts and traditional ML models
 ```
-
-**Podcast angle:** When fairness is one feature in a commercial responsible-AI suite, does it get the same rigorous attention as standalone academic toolkits? Who audits the auditor when the fairness toolkit is part of a product that also sells safety and security?
 
 ---
 
@@ -120,19 +68,16 @@ pip install responsible-ai-fairness
 
 | Project | Stars | Focus | Best For |
 |---|---|---|---|
-| **AIF360** | 2,866 ⭐ | Comprehensive metric library + mitigation | Understanding how fairness is defined in production/government contexts; **live debate in Issue #528** |
-| **FairLearn** | 2,286 ⭐ | Fairness assessment + mitigation | Practitioners in Microsoft/MLOps ecosystems; **live debate in Issue #1725** |
-| **Aequitas** | 773 ⭐ | Bias auditing + evidence-grade reporting | Auditors who need to produce documentation, not just metrics |
+| **AIF360** | 2,866 ⭐ | Comprehensive metric library + mitigation | Understanding how fairness is defined in production/government contexts; **two live debates in #528 & #558** |
+| **Fairlearn** | 2,286 ⭐ | Fairness assessment + mitigation | Practitioners in Microsoft/MLOps ecosystems; **missing-data debate in #1725** |
 | **Infosys RAI** | 310 ⭐ | Enterprise responsible AI suite | Organizations needing fairness bundled with safety, privacy, and compliance |
 
 ---
 
-## 📖 Essential Explainers & External Resources
+## 📖 Essential External Resources
 
 - [AIF360 documentation](https://aif360.readthedocs.io/en/stable/) — IBM's official metric documentation
 - [FairLearn documentation](https://fairlearn.readthedocs.io/) — Microsoft's fairness toolkit docs
-- [Aequitas documentation](https://dssg.github.io/aequitas/) — DSG's audit toolkit docs
-- [Infosys Responsible AI documentation](https://infosys.github.io/Infosys-Responsible-AI-Toolkit/) — Enterprise responsible AI docs
 - [ProPublica: Machine Bias (2016)](https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing) — The investigation that started the COMPAS debate
 - [Chouldechova (2017): Fair Prediction with Disparate Impact](https://arxiv.org/abs/1703.00056) — The impossibility theorem proof
 - [Kleinberg, Mullainasan & Raghavan (2016): Inherent Trade-offs](https://arxiv.org/abs/1609.05807) — Independent impossibility result
@@ -145,12 +90,9 @@ pip install responsible-ai-fairness
 
 Each episode zooms in on a **specific ongoing disagreement** from an open issue thread:
 
-1. **The Missing-Value Contract Debate** (FairLearn #1725) — Should `MetricFrame` and `plot_roc_curve_by_group` handle missing sensitive features the same way? What does "strict" even mean in a fairness tool?
+1. **The Documentation Accuracy Debate** (AIF360 #528) — When the most-cited fairness toolkit ships a metric docstring that misstates what "zero" means, who owns the definition?
+2. **The Intersectional Analysis Gap** (AIF360 #558) — Should fairness tools serve intersectional communities, or is a single scalar sufficient for regulators?
+3. **The Missing-Value Contract** (FairLearn #1725) — Should fairness tools raise errors on missing sensitive data, or handle it gracefully?
+4. **The Enterprise-vs-Academic Tension** (Infosys RAI) — When fairness is one module in a commercial suite, does it get the same depth as standalone academic toolkits?
 
-2. **The Documentation Accuracy Debate** (AIF360 #528) — When the most-cited fairness toolkit ships a metric docstring that misstates what "zero" means, who owns the definition?
-
-3. **The Audit-Grade vs. Research-Grade Divide** (Aequitas #201, #86) — Should fairness tools be built for producing court-ready evidence, or for exploratory research? Can one tool serve both?
-
-4. **The Enterprise-vs-Academic Tension** (Infosys RAI) — When fairness is one module in a commercial responsible-AI suite, does it get the same depth as standalone academic toolkits? Who decides what "fair enough" means for a product that also sells safety and security?
-
-*Contributors: Add your favourite fairness project to `RESOURCES.md` — just follow the table format above and include stars, license, and a one-line pitch.*
+*Contributors: Add your favourite fairness project — follow the table format above and include stars, license, and a one-line pitch.*
