@@ -1,176 +1,117 @@
-# 📚 Open-Source Fairness & Bias Auditing Resources
+# 📚 Open-Source Fairness Projects — Curated for the Podcast
 
-A curated catalog of **active open-source projects** related to algorithmic fairness, bias auditing, and AI ethics — tracked for the *AI Ethics & Social Justice* podcast.
+Three active, impactful projects where the theory of fairness meets the practice of auditing. Each one represents a different philosophy: comprehensive toolkit, real-world audit pipeline, and community-driven evidence.
 
 ---
 
-## 🏆 Featured Projects (Episode Research)
-
-### 1. [AI Fairness 360 (AIF360) — IBM / Trusted-AI](https://github.com/Trusted-AI/AIF360) — *Comprehensive Fairness Metric Library & Mitigation*
+## 1. [IBM AI Fairness 360 (AIF360)](https://github.com/Trusted-AI/AIF360)
 
 | | |
 |---|---|
-| **Stars** | 2,866 ⭐ |
+| **Stars** | ⭐ 2,866 |
 | **Language** | Python (also R) |
 | **License** | Apache-2.0 |
-| **Last Updated** | September 2026 |
-| **Maintainer** | IBM Research (Trusted-AI org) |
+| **Last updated** | September 2026 (actively maintained) |
+| **Forks** | 914 |
 
-**What it does:** An extensible open-source library containing techniques developed by the research community to detect and mitigate bias in machine learning models throughout the AI application lifecycle. Includes 15+ bias mitigation algorithms (Optimized Preprocessing, Disparate Impact Remover, Equalized Odds Postprocessing, Reweighing, Adversarial Debiasing, etc.) and a comprehensive set of fairness metrics (Demographic Parity, Equalized Odds, Predictive Parity, Generalized Entropy Index, Differential Fairness, and more).
+**What it is:** The canonical open-source fairness toolkit. A comprehensive library of 10+ fairness metrics (demographic parity, equalized odds, predictive parity, calibration, etc.) and 15+ bias-mitigation algorithms spanning pre-processing, in-processing, and post-processing. Developed at IBM Research and now stewarded by the LF AI & Data Foundation.
 
-**Why it matters for the podcast:** AIF360 is the most widely cited fairness toolkit in production and government contexts. Its metrics are referenced in regulatory filings, court briefs, and compliance reports. But as Issue #528 reveals, the documentation for its `average_odds_difference` metric has stated for **2+ years** that "a value of 0 indicates equality of odds" — which is mathematically incorrect. This isn't just a typo; it's a definitional error in the most-cited fairness toolkit.
+**Why it matters for the podcast:** AIF360 is the tool that ships in tutorials, gets cited in papers, and underpins enterprise fairness pipelines. When its documentation is wrong, the error propagates everywhere. Its `average_odds_difference` metric has been mislabeled for months — see [Issue #528](https://github.com/Trusted-AI/AIF360/issues/528).
 
-🔴 **Live Debate:** See [AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528) — The `average_odds_difference` docstring says "A value of 0 indicates equality of odds," but the issue author proved with a diagram that any pair of points on a specific line have `average_odds_difference=0` yet do **not** fulfill equalized odds. The error also appears on IBM's own website. After 17 months of no maintainer response, a volunteer (Hanabi9248) offered a concrete correction in September 2026 — but the issue remains **unassigned and unmerged**. See `DEBATES.md` for the full summary.
+**Podcast angle:** *The gold standard — but who audits the auditors?*
 
-```bash
-pip install aif360
-from aif360.metrics import ClassificationMetric
-# Try the metric whose docstring is wrong — then read the issue
-```
+**Key algorithms:**
+- Optimized Preprocessing (Calmon et al., 2017)
+- Disparate Impact Remover (Feldman et al., 2015)
+- Equalized Odds Postprocessing (Hardt et al., 2016)
+- Reweighing (Kamiran & Calders, 2012)
+- Adversarial Debiasing (Zhang et al., 2018)
+- Exponentiated Gradient Reduction (Agarwal et al., 2018)
 
-**Podcast angle:** When the most-cited fairness toolkit ships a docstring that conflates a metric with the concept it's supposed to measure, who owns the definition of "fair"? And is a volunteer-submitted fix without a maintainer merge actually authoritative?
+**Key metrics:**
+- Demographic Parity Difference
+- Equalized Odds Difference  
+- Predictive Parity Difference
+- Average Odds Difference ← *the controversial one*
+- Generalized Entropy Index
+- Differential Fairness
 
----
-
-### 2. [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn) — *Fairness Assessment & Mitigation*
-
-| | |
-|---|---|
-| **Stars** | 2,286 ⭐ |
-| **Language** | Python |
-| **License** | MIT |
-| **Last Updated** | September 2026 |
-| **Maintainer** | Microsoft (fairlearn org) |
-
-**What it does:** A Python package to assess and improve the fairness of ML models. Supports key fairness metrics and mitigation algorithms with scikit-learn integration. The flagship tool `MetricFrame` provides disaggregated metric computation across sensitive features.
-
-**Why it matters for the podcast:** FairLearn is the only major fairness toolkit designed from the ground up for scikit-learn compatibility, making it the default choice for practitioners in MLOps pipelines. But its API design reveals a fundamental tension: should a fairness tool be a general-purpose framework for *all* ML settings, or a specialized instrument for classification/regression? This debate is happening **right now** in Issue #756 — 74 comments over 5 months, unresolved.
-
-🔴 **Live Debate:** See [FairLearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756) — MetricFrame API design: should the tool support metrics that don't require `y_true` and `y_pred`? The maintainer wants to generalize; other maintainers want to keep it simple. See `DEBATES.md` for the full transcript and analysis.
-
-```bash
-pip install fairlearn
-from fairlearn.metrics import MetricFrame
-# Try the API that's being debated — then read the issue
-```
-
-**Podcast angle:** Who does a fairness tool serve — the practitioner who needs simplicity, or the researcher who needs generality? And who decides?
+🔗 **Docs:** [aif360.readthedocs.io](https://aif360.readthedocs.io/en/latest/)  
+🔗 **Interactive:** [aif360.res.ibm.com](https://aif360.res.ibm.com/)  
+🔗 **Slack:** [aif360.slack.com](https://join.slack.com/t/aif360/shared_invite/zt-5hfvuafo-X0~g6tgJQ~7tIAT~S294TQ)
 
 ---
 
-### 3. [Fair-Code — yakew7](https://github.com/yakew7/Fair-Code) — *7 Open-Source Algorithmic Bias Audits*
+## 2. [Fair-Code (by Yash Kewlani)](https://github.com/yakew7/Fair-Code)
 
 | | |
 |---|---|
-| **Stars** | 47 ⭐ |
+| **Stars** | ⭐ 47 |
 | **Language** | Python / HTML |
 | **License** | MIT |
-| **Last Updated** | September 2026 |
-| **Maintainer** | Yash Kewlani (solo, with community contributors) |
+| **Last updated** | September 2026 (very active) |
+| **Forks** | 44 |
 
-**What it does:** Seven full fairness audits across criminal justice (COMPAS), hiring, lending, healthcare, welfare eligibility, and tenant screening. Each audit ships as runnable scripts (`unfair.py` / `fair.py`) plus Jupyter notebooks. Includes an Open Dataset Profiler (client-side web tool + CLI), a benchmark harness with 5 mitigation strategies (S0–S4), 6 fairness metrics with bootstrap CIs and permutation tests, and 61 plain-language explainers. Also ships an MCP server for agent tool-calling.
+**What it is:** A one-person research operation that runs end-to-end bias audits on seven real-world domains: COMPAS criminal justice, hiring, lending, insurance denial, welfare eligibility, healthcare readmission, and tenant screening. Each audit ships as `unfair.py` (biased model) and `fair.py` (mitigated model) with before/after fairness gap measurements.
 
-**Why it matters for the podcast:** Fair-Code is the most transparently documented fairness project we found. Every audit follows the same pipeline: train a biased model → measure the fairness gap → identify proxy variables → remove them → retrain → measure again. The results are publishable-grade. The healthcare focus is distinctive — three of seven audits examine bias in medical AI, where the consequences are clinical rather than financial. The tenant screening audit delivers a devastating finding: removing race and all 12 proxy variables only cuts the fairness gap from 6.68% to 5.16%, and it stays statistically significant — because the label itself (re-arrest) is a policed quantity.
+**Why it matters for the podcast:** Fair-Code is fairness auditing as *journalism*. It doesn't just implement metrics — it tells stories with data. The tenant screening audit is a masterclass in how removing "race" from a model changes almost nothing when the label itself (re-arrest) is policed along racial lines.
 
-**Active issues:**
-- [#672](https://github.com/yakew7/Fair-Code/issues/672) — SHAP Measurement Problem: how should you report race's influence? The answer depends on a denominator choice (top-5 features vs. all features), which is a rhetorical decision disguised as a number
-- [#665](https://github.com/yakew7/Fair-Code/issues/665) — The Impossibility Triangle: when base rates differ, you can't satisfy equalized odds and predictive parity simultaneously
+**Podcast angle:** *Fairness auditing as investigative reporting — one auditor, seven domains, zero中东girls.*
 
-```bash
-git clone https://github.com/yakew7/Fair-Code.git
-cd Fair-Code
-pip install -r requirements.txt
-python COMPAS/unfair.py   # see the bias
-python COMPAS/fair.py     # see the fix
+**Audit pipeline:**
+```
+Train biased model → Measure fairness gap → Identify proxies → Remove protected attrs + proxies → Retrain → Measure again
 ```
 
-**Podcast angle:** What happens when the math itself says "you can't have it all"? The impossibility theorem isn't a bug — it's a feature of the underlying mathematics. And the choice of which metric to prioritize is a political decision.
+**Key feature:** 61 plain-language explainers covering everything from "What is a Proxy Variable?" to "What Is Simpson's Paradox in Fairness Audits?"
+
+🔗 **Live website:** [thefaircode.xyz](https://www.thefaircode.xyz)  
+🔗 **Open Dataset Profiler:** Drop in a CSV, get a demographic representation audit in your browser
 
 ---
 
-### 4. [Infosys Responsible AI Toolkit — Infosys](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit) — *Safety, Security, Explainability, Fairness & Hallucination Detection*
+## 3. [EqualityML (by Equality AI)](https://github.com/EqualityAI/EqualityML)
 
 | | |
 |---|---|
-| **Stars** | 310 ⭐ |
-| **Language** | Python |
+| **Stars** | ⭐ 35 |
+| **Language** | Jupyter Notebook / Python (also R on CRAN) |
 | **License** | Apache-2.0 |
-| **Last Updated** | September 2026 |
-| **Maintainer** | Infosys |
+| **Last updated** | Active community contributions |
+| **Forks** | 2 |
 
-**What it does:** A comprehensive Responsible AI toolkit that goes beyond fairness to include safety, security, explainability, and hallucination detection for LLMs. Covers bias detection across multiple dimensions, with tools for both traditional ML and generative AI contexts.
+**What it is:** A community-driven, evidence-based toolkit from Equality AI (a public-benefit corporation) that unifies fairness metrics and bias mitigation into a single `FAIR` API. 12 fairness metrics and 4 bias mitigation methods, with a decision-tree questionnaire to help practitioners choose the right metric for their use case.
 
-**Why it matters for the podcast:** This is the only major fairness toolkit that explicitly addresses **both** traditional ML bias **and** LLM hallucination/grounding failures. As AI systems shift from discriminative to generative models, the definition of "fairness" itself is expanding. Does a hallucinating model that confidently invents facts about a person's background constitute a fairness failure? The Infosys toolkit suggests the industry thinks so — but the framing raises new questions about what "bias" means when the model can make things up.
+**Why it matters for the podcast:** EqualityML asks a question that AIF360 doesn't: *"How do you choose which fairness metric to use?"* Their [Fairness Metric Selection Questionnaire & Tree](https://github.com/EqualityAI/EqualityML/blob/main/Equality%20AI%20Fairness%20Metric%20Selection%20Questionnaire%20%26%20Tree.pdf) is itself a contribution to the methodology debate — literally a flowchart for deciding what "fair" means in your context.
 
-**Podcast angle:** When the definition of "bias" expands to include hallucinations and safety failures, are we talking about the same thing — or has the concept of "fairness" been stretched so thin it's losing analytical power?
+**Podcast angle:** *The metric selection problem — because between demographic parity and equalized odds, there are 12 options and no consensus on which to pick.*
 
----
+**Available metrics:**
+- Statistical Parity, Conditional Statistical Parity
+- Negative Predictive Parity, Predictive Parity
+- Equal Opportunity, Equalized Odds
+- Balance for Positive/Negative Class
+- Predictive Equality, Well Calibration
+- Conditional Use Accuracy, Overall Balance
 
-## 📖 Bonus: Related Projects
+**Available mitigations:**
+- Resampling, Reweighting
+- Disparate Impact Remover, Correlation Remover
 
-### [EqualityML — EqualityAI](https://github.com/EqualityAI/EqualityML) — *Evidence-Based Fairness Tools & Community Collaboration*
-
-| | |
-|---|---|
-| **Stars** | 35 ⭐ |
-| **Language** | Jupyter Notebook / Python (also R) |
-| **License** | Apache-2.0 |
-
-A Python and R package providing fairness metrics and bias mitigation methods. Includes a Fairness Metric Selection Questionnaire & Decision Tree. In-processing and post-processing methods are listed as "still under development."
-
-**Podcast angle:** Does the "under development" status of in-processing and post-processing methods mean EqualityML is incomplete — or does it correctly argue that pre-processing is where the real fairness battle is won or lost?
-
-### [AIBF_API — jbarach2012](https://github.com/jbarach2012/AIBF_API) — *Explainable Bias-Detection Firewall for Hiring ATS*
-
-| | |
-|---|---|
-| **Stars** | 195 ⭐ |
-| **Language** | Python |
-| **License** | Apache 2.0 |
-
-An open-source, explainable bias-detection firewall for Applicant Tracking Systems. AIBF intercepts an ATS scoring decision, measures how much of it was driven by protected-attribute proxies rather than merit, explains why in plain language, and flags biased decisions for human review.
+🔗 **PyPI:** `pip install equalityml`  
+🔗 **Slack:** [equalityai.com/slack](https://equalityai.com/community/#manifesto)
 
 ---
 
-## 🗺️ The Fairness Landscape — Quick Reference
+## How to Use This Catalog
 
-| Project | Stars | Focus | Best For |
-|---|---|---|---|
-| **AIF360** | 2,866 ⭐ | Comprehensive metric library + mitigation | Understanding how fairness is defined in production/government contexts; **live debate in Issue #528** |
-| **FairLearn** | 2,286 ⭐ | Fairness assessment + mitigation | Practitioners in Microsoft/MLOps ecosystems; **live debate in Issue #756** |
-| **Fair-Code** | 47 ⭐ | 7 full bias audits + dataset profiler + explainers | Domain-specific audits (COMPAS, healthcare, tenant screening); SHAP measurement debate |
-| **Infosys RAI** | 310 ⭐ | Safety + fairness + hallucination detection for LLMs | The expanding definition of "bias" in the generative AI era |
-| **EqualityML** | 35 ⭐ | Pre-processing fairness metrics + mitigation | Public-benefit approach; the "pre-processing only" question |
-| **AIBF_API** | 195 ⭐ | Real-time bias detection in hiring ATS | The hiring-pipeline use case; post-hoc flagging vs. pre-decision interception |
+| If you're a… | Start with | Then explore |
+|---|---|---|
+| **Practitioner** building a fairness pipeline | AIF360 (comprehensive) | EqualityML (metric selection guide) |
+| **Journalist / documentarian** | Fair-Code (real audits, real stories) | AIF360 issue #528 (the documentation debate) |
+| **Researcher** | AIF360 (algorithms + metrics) | EqualityML (methodology formalism) |
+| **Curious listener** | Fair-Code's [explainers](https://www.thefaircode.xyz) | This repo's `DEBATES.md` |
 
 ---
 
-## 📖 Essential Explainers & External Resources
-
-- [AIF360 documentation](https://aif360.readthedocs.io/en/stable/) — IBM's official metric documentation (see Issue #528 for known errors)
-- [FairLearn documentation](https://fairlearn.readthedocs.io/) — Microsoft's fairness toolkit docs
-- [Fair-Code explainers](https://www.thefaircode.xyz) — 61 plain-language fairness explainers with runnable code
-- [AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528) — The average_odds_difference documentation bug (open since April 2024)
-- [FairLearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756) — MetricFrame API design debate (74 comments, open since 2021)
-- [Fair-Code Issue #672](https://github.com/yakew7/Fair-Code/issues/672) — The SHAP Measurement Problem
-- [ProPublica: Machine Bias (2016)](https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing) — The investigation that started the COMPAS debate
-- [Chouldechova (2017): Fair Prediction with Disparate Impact](https://arxiv.org/abs/1703.00056) — The impossibility theorem proof
-- [Kleinberg, Mullainasan & Raghavan (2016): Inherent Trade-offs](https://arxiv.org/abs/1609.05807) — Independent impossibility result
-- [Barocas & Hardt: Fairness and Machine Learning](https://fairmlbook.org/) — Free textbook, Chapters 2 and 4 directly relevant
-- [Kusner et al. (2017): Counterfactual Fairness](https://arxiv.org/abs/1703.06856) — NeurIPS paper introducing the causal framework
-
----
-
-## 🎙️ How These Projects Connect to the Podcast
-
-Each episode zooms in on a **specific ongoing disagreement** from an open issue thread:
-
-1. **The Average-Odds Documentation Bug** (AIF360 #528) — When the most-cited fairness toolkit ships a metric docstring that misstates what "zero" means, who owns the definition?
-2. **The MetricFrame API Design Debate** (FairLearn #756) — Should a fairness tool support metrics beyond classification/regression, even if it makes the API more complex? Who does the tool serve — practitioners or researchers? This is our **featured debate** this season.
-3. **The Intersectional Analysis Gap** (AIF360 #558) — Should fairness tools return a single scalar, or should they break down discrimination by specific group combinations?
-4. **The SHAP Measurement Problem** (Fair-Code #672) — Does the choice of denominator change the story of racial bias?
-5. **The Impossibility Triangle** (Fair-Code #665) — When base rates differ, you can't satisfy equalized odds and predictive parity simultaneously. Which metric wins?
-6. **The "Pre-Processing Only" Question** (EqualityML) — Can a fairness toolkit be complete if it only handles pre-processing?
-7. **The Generative Fairness Frontier** (Infosys RAI) — When the definition of "bias" expands to include hallucinations, are we still talking about fairness?
-
-*Contributors: Add your favourite fairness project to `RESOURCES.md` — just follow the table format above and include stars, license, and a one-line pitch.*
+*To add a project: Open a PR or open an issue tagged `debate-nomination`. Include: repo link, stars, license, what fairness problem it solves, and why a podcast listener should care.*
