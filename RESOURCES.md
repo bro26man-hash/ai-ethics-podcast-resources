@@ -16,7 +16,7 @@ Three active, impactful projects where the theory of fairness meets the practice
 
 **What it is:** The canonical open-source fairness toolkit. A comprehensive library of 10+ fairness metrics (demographic parity, equalized odds, predictive parity, calibration, etc.) and 15+ bias-mitigation algorithms spanning pre-processing, in-processing, and post-processing. Developed at IBM Research and now stewarded by the LF AI & Data Foundation.
 
-**Why it matters for the podcast:** AIF360 is the tool that ships in tutorials, gets cited in papers, and underpins enterprise fairness pipelines. When its documentation is wrong, the error propagates everywhere. Its `average_odds_difference` metric has been mislabeled for months — see [Issue #528](https://github.com/Trusted-AI/AIF360/issues/528).
+**Why it matters for the podcast:** AIF360 is the tool that ships in tutorials, gets cited in papers, and underpins enterprise fairness pipelines. When its documentation is wrong, the error propagates everywhere. Its `average_odds_difference` metric has been mislabeled for months — see [Issue #528](https://github.com/Trusted-AI/AIF360/issues/528). And its `Empirical Differential Fairness` metric only returns a single scalar, making intersectional analysis impossible — see [Issue #558](https://github.com/Trusted-AI/AIF360/issues/558).
 
 **Podcast angle:** *The gold standard — but who audits the auditors?*
 
@@ -56,7 +56,7 @@ Three active, impactful projects where the theory of fairness meets the practice
 
 **Why it matters for the podcast:** Fair-Code is fairness auditing as *journalism*. It doesn't just implement metrics — it tells stories with data. The tenant screening audit is a masterclass in how removing "race" from a model changes almost nothing when the label itself (re-arrest) is policed along racial lines.
 
-**Podcast angle:** *Fairness auditing as investigative reporting — one auditor, seven domains, zero中东girls.*
+**Podcast angle:** *Fairness auditing as investigative reporting — one auditor, seven domains, zero shortcuts.*
 
 **Audit pipeline:**
 ```
@@ -70,36 +70,66 @@ Train biased model → Measure fairness gap → Identify proxies → Remove prot
 
 ---
 
-## 3. [EqualityML (by Equality AI)](https://github.com/EqualityAI/EqualityML)
+## 3. [Aequitas](https://github.com/dssg/aequitas)
 
 | | |
 |---|---|
-| **Stars** | ⭐ 35 |
-| **Language** | Jupyter Notebook / Python (also R on CRAN) |
-| **License** | Apache-2.0 |
-| **Last updated** | Active community contributions |
-| **Forks** | 2 |
+| **Stars** | ⭐ 773 |
+| **Language** | Python |
+| **License** | MIT |
+| **Last updated** | September 2026 (actively maintained) |
+| **Forks** | 125 |
 
-**What it is:** A community-driven, evidence-based toolkit from Equality AI (a public-benefit corporation) that unifies fairness metrics and bias mitigation into a single `FAIR` API. 12 fairness metrics and 4 bias mitigation methods, with a decision-tree questionnaire to help practitioners choose the right metric for their use case.
+**What it is:** A bias auditing and "correction" toolkit from the Data & Society Research Institute (University of Chicago). Unlike AIF360's comprehensive approach, Aequitas is designed specifically for the **audit → correction → experiment** workflow, making it the most practitioner-friendly toolkit for non-technical audiences.
 
-**Why it matters for the podcast:** EqualityML asks a question that AIF360 doesn't: *"How do you choose which fairness metric to use?"* Their [Fairness Metric Selection Questionnaire & Tree](https://github.com/EqualityAI/EqualityML/blob/main/Equality%20AI%20Fairness%20Metric%20Selection%20Questionnaire%20%26%20Tree.pdf) is itself a contribution to the methodology debate — literally a flowchart for deciding what "fair" means in your context.
+**Why it matters for the podcast:** Aequitas is built by social scientists and engineers who intentionally design for policymakers, not just data scientists. Its `Audit` class produces group-level fairness reports with built-in visualizations, and its `Aequitas Flow` extension adds bias mitigation experiments. It's the bridge between academic fairness research and real-world governance.
 
-**Podcast angle:** *The metric selection problem — because between demographic parity and equalized odds, there are 12 options and no consensus on which to pick.*
+**Podcast angle:** *The people's toolkit — fairness auditing designed for the communities being audited, not just the engineers building the models.*
 
-**Available metrics:**
-- Statistical Parity, Conditional Statistical Parity
-- Negative Predictive Parity, Predictive Parity
-- Equal Opportunity, Equalized Odds
-- Balance for Positive/Negative Class
-- Predictive Equality, Well Calibration
-- Conditional Use Accuracy, Overall Balance
+**Key features:**
+- **Audit module:** Confusion-matrix-based fairness metrics per group (TPR, FPR, PPV, NPV) with disparity plots
+- **Flow experiments:** Pre-processing (Data Repairer, Prevalence Sampling), in-processing (FairGBM, Fairlearn), and post-processing (Group Threshold, Balanced Group Threshold)
+- **Visualization:** Built-in summary and disparity plots — no matplotlib expertise required
+- **Datasets:** BankAccountFraud and FolkTables included for reproducible research
+- **Extensibility:** User-implemented methods with intuitive interfaces
 
-**Available mitigations:**
-- Resampling, Reweighting
-- Disparate Impact Remover, Correlation Remover
+**Key fairness concepts covered:**
+- Predictive Equality (equal FPR across groups)
+- Demographic Parity (equal selection rates)
+- Equalized Odds (equal TPR and FPR)
+- Calibration (equal precision across groups)
 
-🔗 **PyPI:** `pip install equalityml`  
-🔗 **Slack:** [equalityai.com/slack](https://equalityai.com/community/#manifesto)
+🔗 **Docs:** [dssg.github.io/aequitas](https://dssg.github.io/aequitas/)  
+🔗 **Colab tutorials:** [Notebooks](https://github.com/dssg/aequitas/tree/notebooks)  
+🔗 **Project site:** [dsapp.uchicago.edu/aequitas](http://dsapp.uchicago.edu/aequitas/)
+
+---
+
+## 4. [Infosys Responsible AI Toolkit](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit)
+
+| | |
+|---|---|
+| **Stars** | ⭐ 310 |
+| **Language** | Python |
+| **License** | MIT |
+| **Last updated** | September 2026 (actively maintained) |
+| **Forks** | 82 |
+
+**What it is:** An enterprise-grade, modular toolkit from Infosys that covers fairness, safety, privacy, security, explainability, and hallucination detection — with a strong focus on **LLMs** as well as traditional ML. Unlike the academic tone of AIF360, this is fairness tooling built for corporate production pipelines.
+
+**Why it matters for the podcast:** This is what "responsible AI" looks like when a 100,000-employee consultancy is shipping it to clients. It reveals the tensions between corporate needs and ethical ideals — and shows how fairness gets operationalized (and sometimes diluted) in enterprise contexts. The Fairness & Bias module implements Statistical Parity Difference, Disparate Impact Ratio, Four-Fifths Rule, Cohen's D, Equalized Odds, and Re-weighing.
+
+**Podcast angle:** *Fairness as a service — when bias auditing becomes a product, who sets the standards?*
+
+**Key modules:**
+- **Fairness & Bias API:** For both LLM prompts/responses and traditional ML models
+- **Moderation Layer:** Safety, privacy, explainability, and hallucination detection
+- **Explainability:** SHAP (global) and LIME (local) for model interpretation
+- **Security:** Adversarial attack simulation and defense recommendations
+- **Red Teaming:** PAIR and TAP techniques for LLM robusteness
+
+🔗 **Installation:** [README](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit/blob/master/README.md)  
+🔗 **Features doc:** [2.2.1 docx](https://github.com/Infosys/Infosys-Responsible-AI-Toolkit/blob/master/Features%20and%20Endpoints-2.2.1.docx)
 
 ---
 
@@ -107,9 +137,9 @@ Train biased model → Measure fairness gap → Identify proxies → Remove prot
 
 | If you're a… | Start with | Then explore |
 |---|---|---|
-| **Practitioner** building a fairness pipeline | AIF360 (comprehensive) | EqualityML (metric selection guide) |
+| **Practitioner** building a fairness pipeline | AIF360 (comprehensive) | Aequitas (audit → correction workflow) |
 | **Journalist / documentarian** | Fair-Code (real audits, real stories) | AIF360 issue #528 (the documentation debate) |
-| **Researcher** | AIF360 (algorithms + metrics) | EqualityML (methodology formalism) |
+| **Policy researcher** | Aequitas (designed for non-experts) | Infosys toolkit (enterprise operationalization) |
 | **Curious listener** | Fair-Code's [explainers](https://www.thefaircode.xyz) | This repo's `DEBATES.md` |
 
 ---
