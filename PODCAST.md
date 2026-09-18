@@ -1,41 +1,39 @@
-# 🎙️ AI Ethics & Social Justice — Podcast Episode Map
+# 🎙️ AI Ethics & Social Justice — Podcast Production Notes
 
-## Episode 1: What Does "Zero" Mean? — The AIF360 Documentation Debate
+## Episode Structure
 
-**Focus:** Algorithmic fairness metric definitions and who owns them
-**Primary source:** [AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528)
-**Secondary sources:** [AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558), [FairLearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725)
-**Featured projects:** AIF360, FairLearn, Aequitas
+Each episode follows a three-act format:
 
-### Key themes:
-- When a fairness toolkit's docstring misstates what "zero" means, who owns the definition?
-- Is 17 months of unmaintained documentation a symptom of the research-to-production gap?
-- Should fairness toolkits be required to publish formal verification of their metric definitions?
-- If two tools (AIF360 vs. FairLearn) define the same metric differently, which definition should a regulator adopt?
-- Is a volunteer-submitted fix without maintainer merge pathway actually authoritative?
+### Act 1: The Tool (5 min)
+Introduce the open-source project — what it does, who maintains it, what it's used for.
 
-### Talking points:
-1. The math is fine — the words are wrong
-2. Docstrings are not just documentation; they're policy
-3. The volunteer-maintenance trap in "open source"
-4. What does "open" really mean when the maintainers are silent?
+### Act 2: The Debate (15 min)
+Deep-dive into a specific unresolved controversy from an issue thread. Present multiple perspectives.
 
----
+### Act 3: The Implications (10 min)
+What does this debate mean for policy, for practitioners, and for the communities being audited?
 
-## Episode 2: The Missing-Value Contract — Strict or Silent?
+## Episode Queue
 
-**Focus:** Design philosophy of fairness tools
-**Primary source:** [FairLearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725)
-**Featured projects:** FairLearn, Aequitas
+| # | Debate | Project | Issue | Status |
+|---|---|---|---|---|
+| 1 | The MetricFrame API Design Debate | FairLearn | #756 | ✅ Researched |
+| 2 | The Average-Odds Documentation Bug | AIF360 | #528 | ✅ Researched |
+| 3 | The Intersectional Analysis Gap | AIF360 | #558 | ✅ Researched |
+| 4 | The Missing-Value Contract | FairLearn | #1725 | ✅ Researched |
+| 5 | The SHAP Measurement Problem | Fair-Code | #672 | ✅ Researched |
+| 6 | The Impossibility Triangle | Fair-Code | #665 | ✅ Researched |
 
----
+## Production Notes
 
-## Episode 3: The Intersectional Analysis Gap — One Number or None?
+- All debates are sourced from **live, unresolved GitHub issues**
+- Issue comment counts are current as of research date
+- React with GitHub reactions (👍, ❤️) are noted where relevant
+- Maintainer statements are quoted directly from issue threads
+- Volunteer contributions are highlighted separately from maintainer responses
 
-**Focus:** Intersectionality in algorithmic fairness
-**Primary source:** [AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558)
-**Featured projects:** AIF360, Aequitas
+## How to Use This Repo
 
----
-
-*Contributors: Add episode outlines to this file. Each episode should link to at least one real GitHub issue and one fairness toolkit.*
+1. **Listeners:** Check `DEBATES.md` for the current episode's controversy, then read the linked issue yourself
+2. **Contributors:** Add new debates to `DEBATES.md`, new projects to `RESOURCES.md`
+3. **Guests:** Use `PODCAST.md` for episode planning and talking-point preparation
