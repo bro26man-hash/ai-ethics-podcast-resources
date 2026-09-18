@@ -1,29 +1,17 @@
-# 🎙️ AI Ethics & Social Justice Podcast — Resource Hub
+# 🎙️ AI Ethics & Social Justice — Podcast episode notes
 
-**A crowdsourced hub** for the *AI Ethics & Social Justice Podcast* — curating open-source fairness tools, unresolved debates, and community discussion on algorithmic bias, fairness metrics, and responsible AI.
+## Episode: Strict or Silent? The Missing-Value Debate in Fairness Toolkits
 
-## 📋 Quick-Start Guide
+### Overview
+This episode explores a live controversy in the FairLearn open-source project: whether fairness tools should raise errors or silently skip missing sensitive feature data. We connect this to broader questions about who owns the definition of "fairness" in practice.
 
-| File | What's Inside |
-|------|--------------|
-| **[RESOURCES.md](RESOURCES.md)** | 6 curated open-source fairness & bias-auditing projects, from production-scale toolkits (Fairlearn, AIF360, Aequitas) to specialized domain audits |
-| **[DEBATES.md](DEBATES.md)** | Real GitHub issue threads with genuine disagreements — starting with the live MetricFrame API debate in Fairlearn (74 comments, still unresolved) |
-| **[README.md](README.md)** | Full project description, featured projects table, and contribution guidelines |
+### Key Resources
+- [FairLearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725) — The live debate
+- [FairLearn PRs #1698 and #1713](https://github.com/fairlearn/fairlearn/pulls) — The PRs that created the inconsistency
+- [AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528) — Documentation accuracy in fairness metrics
+- [Aequitas Issue #201](https://github.com/dssg/aequitas/issues/201) — Missing metric documentation in audit tools
 
-## 🔍 Quick Links
-
-- [Featured Projects Table](README.md#%F0%9F%94%A9-featured-projects)
-- [Full Resource List](RESOURCES.md)
-- [Live Debates & Discussion Threads](DEBATES.md)
-- [Open a Discussion Issue](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues/new)
-- [Fairlearn Issue #756 (MetricFrame debate)](https://github.com/fairlearn/fairlearn/issues/756)
-- [AIF360 Repository](https://github.com/Trusted-AI/AIF360)
-
-## ✊ Get Involved
-
-1. **Raise a new debate** — Found a controversial fairness issue on GitHub? [Open an issue](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues/new) with the link
-2. **Add a project** — Know a fairness tool we missed? Send a PR or file an issue
-3. **Join the discussion** — Reply to any [issue](https://github.com/bro26man-hash/ai-ethics-podcast-resources/issues) — your perspective matters
-4. **Flag errors** — Outdated info or inaccurate summaries? Let us know
-
-*Built for the AI Ethics & Social Justice Podcast. Listening, learning, and acting together.*
+### Discussion Prompts for Listeners
+1. Should fairness tools be strict (raise errors) or permissive (handle gracefully) with missing data?
+2. Who decides what "correct" behavior is — the maintainer, the contributor, or the user?
+3. Can a tool that silently drops rows still produce fair outcomes?
