@@ -4,73 +4,7 @@ A curated summary of real controversies happening in open-source fairness projec
 
 ---
 
-## Debate 1: The Missing-Value Contract — Should Fairness Tools Be Strict or Silent?
-
-**Source:** [fairlearn/fairlearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725)  
-**Project:** [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn)  
-**Tags:** `bug`, `consistency`, `contract`  
-**Status:** Open since September 9, 2026 — unresolved, maintainer-confirmed fix pending  
-**Author:** [aiedwardyi](https://github.com/aiedwardyi) (contributor)  
-**Maintainer confirmation:** [romanlutz](https://github.com/romanlutz) (Sept 16, 2026)
-
-### The Bug Report
-
-`MetricFrame` raises a `ValueError` when given missing sensitive feature values, while `plot_roc_curve_by_group` **silently drops** the rows with missing values and draws curves for the remaining groups plus an "Overall" curve. The docstring and source comments at `_roc_auc.py` L124-130 both claim the plot should match `MetricFrame`'s behavior. That was true when PR #1713 landed, then PR #1698 made `MetricFrame` raise. Both are unreleased and slated for v0.15.0.
-
-**Minimum reproduction:**
-```python
-import numpy as np
-from sklearn.metrics import accuracy_score
-from fairlearn.metrics import MetricFrame, plot_roc_curve_by_group
-
-y_true = np.array([0, 1, 0, 1, 0, 1])
-y_pred = np.array([0, 1, 1, 1, 0, 0])
-y_score = np.array([0.1, 0.9, 0.8, 0.7, 0.2, 0.3])
-sf = np.array(["a", "a", "b", "b", np.nan, np.nan], dtype=object)
-
-MetricFrame(metrics=accuracy_score, y_true=y_true, y_pred=y_pred, sensitive_features=sf)
-# → ValueError: Feature 'sensitive_feature_0' contains missing values.
-#   Remove or replace them before constructing a MetricFrame
-
-plot_roc_curve_by_group(y_true=y_true, y_score=y_score, sensitive_features=sf)
-# → draws Overall, "a", "b"; the two NaN rows are silently dropped
-```
-
-### The Two Sides
-
-**Side A — Make the plot match MetricFrame (strict consistency).**  
-Contributor [LobsterQBA](https://github.com/LobsterQBA) (Sept 14) argued that `plot_roc_curve_by_group` should reject missing values just like `MetricFrame` does, because silently dropping rows creates a misleading comparison: the "Overall" curve includes all rows, but per-group curves exclude the missing-data rows. That means `Overall ≠ weighted average of groups`, which is asilent inconsistency that could distort fairness analysis.
-
-**Side B — Keep the skip behavior and fix the docs (permissive pragmatic).**  
-An alternative view (implied in the issue body) is that dropping rows might be the right behavior for visualization — you can't plot a ROC curve for a group with no data — and the docs should just be upfront about it. The maintainer didn't take this side, but it's a reasonable design position.
-
-**Maintainer's verdict (romanlutz, Sept 16):**  
-> "Missing sensitive feature values should be rejected with a clear `ValueError` in both APIs, consistent with `MetricFrame` after #1698. We do not want the ROC helper to silently drop rows from group curves while retaining them in the overall curve."
-
-The maintainer confirmed: **strict wins.** But the fix hasn't been merged yet.
-
-### Why It Matters Beyond the Repo
-
-This is not just a consistency bug — it reveals a **deep design philosophical question** about fairness tools:
-
-1. **Should fairness tools be strict or permissive by default?** A strict `ValueError` protects users from invisible bias (you can't audit what you can't see), but it also blocks legitimate analyses where missing data is the norm (e.g., survey data, real-world audits where sensitive attributes are often unrecorded).
-
-2. **The "Overall vs. Groups" trap.** When a tool silently drops rows, the "Overall" curve includes everyone while group curves exclude some — creating a comparison that doesn't add up. This is a **visual deception** that could lead auditors to wrong conclusions.
-
-3. **The contract question.** What should the *documented contract* of a fairness function be? Should it say "this will raise an error" or "this will handle missing data gracefully"? The FairLearn maintainers chose strictness — but other tools (Aequitas, AIF360) may make different choices.
-
-4. **Who decides what "correct" behavior is?** The issue was filed by a contributor, confirmed by a maintainer, but the fix is still pending. Meanwhile, anyone using the dev version could get inconsistent results depending on which function they call.
-
-**Discussion prompts for the episode:**
-- Should fairness tools raise errors on missing sensitive data, or should they handle it gracefully? What are the trade-offs?
-- Is silent row-dropping a bug or a feature? When would you want to skip missing data vs. reject it?
-- If two functions in the same toolkit have different missing-data behaviors, is that a bug — or a design choice that needs better documentation?
-- Should fairness toolkits publish formal "contracts" (like API specifications) that define exactly what each function does with edge cases?
-- Who bears the risk when a fairness tool's behavior is inconsistent — the auditor, the regulator, or the person affected by the decision?
-
----
-
-## Debate 2: The Average-Odds Documentation Bug — What Does "Zero" Mean in AIF360?
+## Debate 1: The Average-Odds Documentation Bug — What Does "Zero" Mean in AIF360?
 
 **Source:** [Trusted-AI/AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528)  
 **Project:** [IBM AIF360 — AI Fairness 360](https://github.com/Trusted-AI/AIF360)  
@@ -109,7 +43,7 @@ But the issue remains open, unassigned, and unmerged.
 
 ### Why It Matters Beyond the Repo
 
-This reveals a structural tension in the fairness toolkit ecosystem:
+This is not a niche documentation cleanup. It reveals a structural tension in the fairness toolkit ecosystem:
 
 1. **The gap between research definitions and production tooling.** Research papers define fairness metrics with mathematical precision. Toolkits wrap them in APIs with docstrings that simplify — and sometimes distort — the original definitions.
 
@@ -125,6 +59,58 @@ This reveals a structural tension in the fairness toolkit ecosystem:
 - If a documentation error in a fairness toolkit leads to a biased decision in a court, who bears liability?
 - Is 17 months of unmaintained documentation a symptom of the "research-to-production gap" in AI ethics?
 - When two tools (AIF360 vs. FairLearn) define the same metric differently, which definition should a regulator adopt?
+
+---
+
+## Debate 2: The Intersectional Blind Spot — Should a Fairness Metric Return a Single Number?
+
+**Source:** [Trusted-AI/AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558)  
+**Project:** [IBM AIF360 — AI Fairness 360](https://github.com/Trusted-AI/AIF360)  
+**Tags:** `enhancement`, `intersectional`  
+**Status:** Open since January 21, 2026 — unresolved, 1 comment (September 16, 2026)  
+**Author:** [jetverbeek](https://github.com/jetverbeek)  
+**Volunteer:** [Hanabi9248](https://github.com/Hanabi9248) (comment, Sept 2026)
+
+### The Request
+
+jetverbeek filed this issue after using the Empirical Differential Fairness (EDF) metric in production. The current implementation returns a **single scalar value** summarizing fairness across all protected attributes. But for intersectional analysis — say, Black women, or disabled immigrants — a single number hides which group combinations are suffering the worst violations.
+
+The request is specific:
+- Return the pair(s) of attribute groups that produce the maximum log-ratio
+- Provide a breakdown of all (or top-X) group combinations and their respective log-ratios
+
+### The Design Tension
+
+**Side A — Keep it simple.** A single scalar is easier to integrate into dashboards, reports, and regulatory filings. Adding group-pair breakdowns complicates the API and makes it harder to compare overall fairness scores across models. The existing functions already provide enough granularity for most use cases.
+
+**Side B — Intersectionality is non-negotiable.** A single scalar averages away the experiences of the most-precarious groups. If the worst-off intersectional group has a log-ratio of 0.8 but the overall scalar is 0.3, policymakers see "mostly fair" while Black women face severe discrimination. The metric should make the worst case visible, not bury it in an average. This is the difference between a tool that *detects* bias and a tool that *names* it.
+
+### The Community Response
+
+Hanabi9248 (the same volunteer from Issue #528) offered a practical proposal:
+
+- Keep `smoothed_empirical_differential_fairness()` returning a scalar for backward compatibility
+- Add a separate method for the group-pair breakdown, including the pairs attaining the maximum and an optional top-k limit
+- Use the same instance weights and Dirichlet smoothing as the existing metric
+- Include tests for ties and multiple protected attributes
+
+The proposal is reasonable, but the issue remains unassigned and unmerged — the same pattern as Issue #528.
+
+### Why It Matters Beyond the Repo
+
+This debate is the intersectional counterpoint to Issue #528. Together, they reveal a fundamental design choice in fairness toolkits:
+
+1. **Aggregation vs. granularity.** A single number is easier to communicate but erases the experiences of those at the intersection of multiple marginalized identities. Fairness toolkits must choose between simplicity and justice.
+
+2. **Who is the "default" user?** If the toolkit is designed for compliance officers who need a single checkbox, intersectional analysis is an afterthought. If it's designed for advocates who need to identify the most-precarious groups, the default should surface group-pair breakdowns.
+
+3. **The volunteer-maintenance pattern.** Hanabi9248 has offered to fix both Issue #528 (documentation) and Issue #558 (feature extension) — but neither has been accepted. This raises the question: **is the project open to community contributions, or does it require IBM researcher sign-off?**
+
+**Discussion prompts for the episode:**
+- Should fairness metrics default to showing the worst-off group, or the average? What's the ethical case for each?
+- Is intersectional analysis a "nice-to-have" or a "must-have" for high-stakes audits?
+- When a volunteer offers to fix a bug and add a feature but no maintainer responds, what does that say about the project's governance?
+- Should fairness toolkits be required to support intersectional analysis by default — similar to how clinical trials must report subgroup analyses?
 
 ---
 
