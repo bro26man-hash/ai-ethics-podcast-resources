@@ -1,58 +1,70 @@
-# 🎙️ AI Ethics & Social Justice — Podcast Episode Planner
+# 🎙️ Episode Planner — Technology & Social Justice Podcast
 
-## Episode 1: What Does "Zero" Mean in a Fairness Metric?
+## Featured Episode: "Who Does the Tool Serve? — The FairLearn MetricFrame Debate"
+
+**Source Issue:** [fairlearn/fairlearn #756](https://github.com/fairlearn/fairlearn/issues/756)
+**Related Issue:** [Trusted-AI/AIF360 #528](https://github.com/Trusted-AI/AIF360/issues/528)
+**Projects:** FairLearn (2,286 ⭐), AIF360 (2,866 ⭐)
 
 ### The Hook
-The most-cited fairness toolkit in the world (IBM AIF360, 2,866 GitHub stars) ships a metric docstring that says "a value of 0 indicates equality of odds." A volunteer proved that's mathematically wrong. After 17 months, no maintainer has merged the fix.
 
-### The Key Question
-**Who owns the definition of fairness — the researchers who publish the metrics, the companies that ship the tools, or the communities who live with the decisions those tools produce?**
+A fairness toolkit maintainer wants to make the tool more powerful. Other maintainers want to keep it simple. 74 comments later, it's still unresolved. And the answer determines whose fairness gets measured — and whose gets invisible.
 
-### The Source Material
-- [AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528) — The documentation bug
-- [AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558) — The intersectional analysis gap
-- [AIF360 Issue #548](https://github.com/Trusted-AI/AIF360/issues/548) — The website is down
-- [FairLearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756) — Who does the tool serve?
-- [FairLearn Issue #1725](https://github.com/fairlearn/fairlearn/issues/1725) — The missing-value contract
+### Key Questions for the Episode
 
-### The Guests We'd Love
-- A maintainer of AIF360 or FairLearn
-- A regulator who references these tools (FTC, EU AI Act office)
-- A community organizer who's been affected by algorithmic decisions
-- Hanabi9248 — the volunteer who tried to fix the bug
+1. **The API as values statement** — When FairLearn's `MetricFrame` only supports `metric(y_true, y_pred)`, what kinds of fairness problems become invisible?
+2. **The novice-expert tradeoff** — Is simplicity a form of inclusion, or a form of exclusion?
+3. **Maintainer power** — Who gets to decide what a fairness tool can do? Should users have a say?
+4. **The regulation gap** — EU AI Act requires fairness assessments across diverse use cases. Can a tool that only handles classification meet that requirement?
 
-### The Talking Points
-1. The average_odds_difference docstring says "0 = equality of odds" — but that's false. What happens when the tool's documentation lies by omission?
-2. A volunteer offered a fix. No maintainer merged it for 17 months. Is "open source" a promise or a suggestion?
-3. Two mainstream toolkits (AIF360 vs. FairLearn) define overlapping metrics differently. Which one should a regulator adopt?
-4. The intersectional analysis gap: most tools return a single scalar per protected attribute. But race + gender, disability + age — these intersections are where the worst abuses happen.
-5. Should fairness tool maintainers be required to respond to issues? What would that look like?
+### Talking Points
 
-### The Listener Action
-- Read the issue thread and leave a comment
-- Try computing `average_odds_difference` vs. `equalized_odds_difference` on a real dataset
-- Open a discussion in this repo with your take
+- MiroDudik's Alternative A vs. Alternative B (see DEBATES.md for full code examples)
+- The `shared_sample_params` compromise — what it is, and what it means
+- Why `**kwargs` scares riedgar-ms (and whether he's right)
+- The parallel with AIF360's documentation bug — both are about who controls the definition of fairness
+- The missing voice: neither issue thread has a "community user" perspective — only maintainers
+
+### Guest Suggestions
+
+- A FairLearn maintainer (reach out via Slack/issue)
+- A practitioner who uses MetricFrame in production
+- A researcher working on fairness in non-classification settings (bandits, RL, causal inference)
+- A regulator or policyworker using fairness toolkits for compliance
+
+### Segment Structure
+
+1. **Cold open** — Read MiroDudik's opening post from Issue #756
+2. **The debate** — Walk through the two sides, using real code examples
+3. **The deeper question** — Who does the tool serve, and who decides?
+4. **The parallel** — Connect to AIF360's documentation bug (Issue #528)
+5. **Community discussion** — Address issues #1 and #2 in this repo (see below)
+
+### Follow-Up Actions
+
+- [ ] Listeners: Add your perspective to the Discussion Issue in this repo
+- [ ] Contributors: Submit PRs with additional fairness projects for RESOURCES.md
+- [ ] Everyone: Check out the live issue threads and add your voice
 
 ---
 
-## Episode 2: Who Does the Tool Serve?
+## Upcoming Episodes (Planned)
 
-### The Hook
-FairLearn's MetricFrame API only works with metrics that have the signature `metric(y_true, y_pred)`. But contextual bandits, streaming data, and cost-sensitive learning don't fit that shape. The maintainer wants to generalize. The co-maintainer says it'll confuse novice users.
-
-### The Key Question
-**Should a fairness tool be a general-purpose framework or a specialized instrument — and who gets to decide?**
-
-### The Source Material
-- [FairLearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756) — 74 comments, 5 months, unresolved
-- [AIF360 Issue #558](https://github.com/Trusted-AI/AIF360/issues/558) — Scalar vs. breakdown
-
-### The Talking Points
-1. The 74-comment thread reveals a deep divide between simplicity and generality
-2. API design is a political act — every choice excludes someone
-3. The maintenance bottleneck: when maintainers go silent, who fills the gap?
-4. The downstream harm: if a regulator references a tool's documentation, the API design becomes a policy outcome
+1. **"Zero Says What? — The AIF360 Documentation Bug"** — When the most-cited fairness toolkit ships a math error in its docstring
+2. **"The Impossibility Triangle"** — Why you can't satisfy all fairness metrics simultaneously, and whose rights win
+3. **"48% vs 42% — The SHAP Measurement Problem"** — How a denominator choice becomes a rhetorical decision
+4. **"The Intersectional Analysis Gap"** — Should fairness tools return a single scalar or a breakdown?
+5. **"The Generative Fairness Frontier"** — When 'bias' expands to include hallucinations
 
 ---
 
-*Contributors: Add episode ideas to this file or open an issue with the `episode-suggestion` label.*
+## Episode Archive
+
+| # | Title | Source | Status |
+|---|---|---|---|
+| 1 | Who Does the Tool Serve? | FairLearn #756 | 🎙️ Recording |
+| 2 | Zero Says What? | AIF360 #528 | 📝 Pre-production |
+| 3 | The Impossibility Triangle | Fair-Code #665 | 📝 Research |
+| 4 | 48% vs 42% | Fair-Code #672 | 📝 Research |
+| 5 | The Intersectional Analysis Gap | AIF360 #558 | 📝 Research |
+| 6 | The Generative Fairness Frontier | Infosys RAI | 📝 Research |

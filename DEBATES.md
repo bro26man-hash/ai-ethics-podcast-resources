@@ -4,7 +4,116 @@ A curated summary of real controversies happening in open-source fairness projec
 
 ---
 
-## Debate 1: The Average-Odds Documentation Bug — What Does "Zero" Mean in AIF360?
+## Debate 1: The MetricFrame API Design Debate — Who Does the Tool Serve?
+
+**Source:** [fairlearn/fairlearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756)
+**Project:** [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn)
+**Tags:** `API`, `design-philosophy`
+**Status:** Open since April 22, 2021 — unresolved (over 5 years), 74 comments
+**Author:** [MiroDudik](https://github.com/MiroDudik) (FairLearn maintainer, MIC member)
+
+### The Core Question
+
+`MetricFrame` is FairLearn's flagship tool for computing fairness metrics with disaggregation by sensitive features. But it only works with metrics that have the signature `metric(y_true, y_pred)`. Maintainer MiroDudik proposes two changes that would fundamentally reshape the tool:
+
+- **Step 1:** Make all arguments keyword-only and rename `metric` → `metrics`
+- **Step 2:** Allow flexible shared sample parameters (e.g., `actions_taken`, `rewards`, `propensities` for contextual bandits)
+
+The goal: support **dataset-only metrics**, **streaming metrics**, and **metrics from other domains** (cost-sensitive learning, reinforcement learning). But the maintainers disagree on whether this flexibility is worth the complexity.
+
+### The Two Sides — In Their Own Words
+
+**Side A — Generalize MetricFrame (MiroDudik's position):**
+
+> "The current API is really limiting us." *(Comment 3)*
+
+MiroDudik argues that real use cases exist beyond classification:
+- Dataset-only metrics (e.g., demographic parity needs only `sensitive_features`, no `y_true`/`y_pred`)
+- Streaming metrics (data arrives incrementally)
+- Contextual bandit metrics (parameters are `actions_taken`, `rewards`, `propensities`)
+- Cost-sensitive learning (parameters are `costs`, `y_pred`)
+
+He proposes **Alternative A**: make `y_true` and `y_pred` optional (default `None`), with all parameters passed as keyword arguments:
+
+```python
+# Proposed new API
+MetricFrame(*, metrics, y_true=None, y_pred=None, sensitive_features=None, 
+            control_features=None, sample_params=None)
+```
+
+He demonstrates with concrete code — for example, replacing confusing wrapper lambdas with clean direct calls:
+
+```python
+# Before: confusing wrapper for a metric that doesn't need y_true
+def ips_wrapper(y_true, y_pred, *, actions_taken, rewards, propensities, actions_target):
+    return inverse_propensity_score(actions_taken=actions_taken, rewards=rewards,
+                                    propensities=propensities, actions_target=actions_target)
+
+mf = MetricFrame(ips_wrapper, dummy_y_true, dummy_y_pred, sensitive_features=sf,
+                 sample_params={'actions_taken': actions_taken, ...})
+
+# After: clean, direct usage
+mf = MetricFrame(metrics=inverse_propensity_score,
+                 sample_params={'actions_taken': actions_taken, 'rewards': rewards,
+                                'propensities': propensities, 'actions_target': actions_target})
+```
+
+He also proposes **Alternative B** with `**direct_sample_params` using `inspect.signature()` to automatically route arguments — but acknowledges it introduces "magic."
+
+**Side B — Keep MetricFrame simple, build new classes for new use cases (riedgar-ms, hildeweerts):**
+
+> "I am afraid that trying to fit all different kinds of learning tasks into one MetricFrame will become extremely confusing for novice users." — *hildeweerts (Comment 5)*
+
+> "`**kwargs` in the signature means that if we ever want to add new arguments to the signature, we're going to break someone." — *riedgar-ms (Comment 25)*
+
+> "The majority of users will be looking for classification/regression metrics and may not even be familiar with reinforcement learning." — *hildeweerts (Comment 4)*\n
+riedgar-ms's core argument: **MetricFrame does a fairly simple thing well** (taking an sklearn-style metric and turning it into one with grouping). He'd rather keep it that way and work out the best API for new use cases from a clean sheet:
+
+> "I would probably be better to keep the existing MetricFrame API around, doing its simple job." *(Comment 12)*
+
+He proposes `shared_sample_params` as a dictionary parameter (not `**kwargs`):
+
+> "We 'explode' the `Dict[str, vector]` when the metric functions themselves are invoked." *(Comment 9)*
+
+### The Compromise That Emerged After 74 Comments Over 5 Months
+
+1. ✅ **Rename `metric` → `metrics`** (everyone agrees)
+2. ✅ **Switch to keyword-only arguments** (everyone agrees)
+3. ✅ **Add `shared_sample_params` as a dictionary** (not `**kwargs`) (everyone agrees)
+4. ❌ **Optional `y_true`/`y_pred`** — still contested. riedgar-ms: "I would not be overjoyed at defaulting `y_true` and `y_pred` to `None`. That is not how sklearn metrics work."
+5. ❓**New class for non-standard metrics** — still open. riedgar-ms: "I would like to know more before deciding to support those by extending MetricFrame (rather than creating a new class)."
+
+### The Deeper Tension: Who Does the Tool Serve?
+
+This isn't just an API design debate. It's a question about the **politics of Fairness tooling**:
+
+**For practitioners** (hiring, lending, compliance): Classification metrics are enough. They want a simple, predictable API that works like sklearn. They don't need contextual bandits or streaming metrics.
+
+**For researchers** (bandits, causal inference, streaming, RL): The current API is a straitjacket. They need to audit fairness in novel settings where `y_true` and `y_pred` don't exist.
+
+**For the project's future**: Every generalization makes the API harder to document, test, and extend. Every specialization fragments the ecosystem. The "right" answer depends on who you believe the tool is *for*.
+
+**The unspoken question**: When a fairness tool is designed by and for Microsoft's MLOps ecosystem, does it inherently prioritize the needs of large-scale deployers over the needs of researchers working on Cutting-edge fairness problems? And if so, whose fairness gets measured?
+
+### Why This Matters Beyond the Repo
+
+1. **API design is a values statement.** Choosing to support only `metric(y_true, y_pred)` means choosing to measure fairness only in classification/regression contexts. It silently excludes entire domains of ML where bias can occur — bandits, recommendation systems, generative models.
+2. **The novice-expert tradeoff.** hildeweerts's concern about novice users is legitimate — but it's also a form of gatekeeping. If the tool is too simple, it can't capture the complexity of real-world fairness problems.
+3. **The fragmentation risk.** If FairLearn creates separate classes for each problem type, we get `SupervisedMetricFrame`, `UnsupervisedMetricFrame`, `ReinforcementMetricFrame` — and practitioners have to know which one to use before they even understand the fairness problem.
+4. **The maintainer power dynamic.** MiroDudik (MIC member, issue author) has push for generalization. riedgar-ms has push for simplicity. The community is split. There's no clear "user" voice in this thread — only maintainer perspectives.
+5. **The intersection with regulation.** EU AI Act and NIST AI RMF require fairness assessments across diverse use cases. If FairLearn's API can't handle those use cases, regulators may be forced to rely on tools that are either too narrow or too complex.
+
+**Discussion prompts for the episode:**
+- Should a fairness tool be a general-purpose framework or a specialized instrument? Where's the line?
+- When does API flexibility become API confusion? Who decides where that line is?
+- Who should decide which use cases a fairness tool supports — the maintainers, the users, or the communities being audited?
+- Is the "keep it simple" argument a legitimate usability concern, or is it a way of avoiding the hard work of supporting novel fairness problems?
+- If a fairness tool can't measure bias in recommendation systems or generative models, is it a failure of the tool — or a limitation that practitioners should work around?
+- Should FairLearn have a "community advisory board" to represent the perspectives of non-maintainer users?
+
+---
+
+## Debate 2: The Average-Odds Documentation Bug — What Does "Zero" Mean in AIF360?
 
 **Source:** [Trusted-AI/AIF360 Issue #528](https://github.com/Trusted-AI/AIF360/issues/528)
 **Project:** [IBM AIF360 — AI Fairness 360](https://github.com/Trusted-AI/AIF360)
@@ -43,80 +152,17 @@ But the issue remains open, unassigned, and unmerged.
 
 This documentation bug is not an isolated case. During research, we found several other open issues in the AIF360 repo that paint a picture of a project under strain:
 
-- **[#548 — Website is down](https://github.com/Trusted-AI/AIF360/issues/548):** Open since February 2025 with 7 comments. The official documentation website has been unavailable, making it harder for users to access metric definitions. A dead website + a misleading docstring = a double documentation failure.
-- **[#558 — Extend Empirical Differential Fairness metric](https://github.com/Trusted-AI/AIF360/issues/558):** Open since January 2026. A contributor wants to *add* a new metric for intersectional analysis, but the existing metrics still have documentation errors. This raises the question: should you add new metrics before fixing the old ones?
+- **[#548 — Website is down](https://github.com/Trusted-AI/AIF360/issues/548):** Open since February 2025 with 7 comments. The official documentation website has been unavailable, making it harder for users to access metric definitions.
+- **[#558 — Extend Empirical Differential Fairness metric](https://github.com/Trusted-AI/AIF360/issues/558):** Open since January 2026. A contributor wants to *add* a new metric for intersectional analysis, but the existing metrics still have documentation errors.
 - **[#526 — Memory Management Issue in ClassificationMetric](https://github.com/Trusted-AI/AIF360/issues/526):** Open since April 2024. A core class has performance problems.
 
 The pattern: **documentation errors, infrastructure decay, and performance issues** all coexist. Volunteer corrections are welcome but unassigned.
 
-### Why It Matters Beyond the Repo
-
-1. **The gap between research definitions and production tooling.** Research papers define fairness metrics with mathematical precision. Toolkits wrap them in APIs with docstrings that simplify — and sometimes distort — the original definitions.
-2. **Who maintains the definitions?** AIF360 is an IBM Research project. When a volunteer identifies a documentation error and no IBM maintainer responds for 17+ months, the question isn't just "who fixes the docstring?" but "who owns the standard?"
-3. **The AIF360 vs. FairLearn divergence.** FairLearn (Microsoft, 2,286 stars) provides overlapping metrics with AIF360 but may define or compute them differently. If two mainstream tools disagree on what "average odds difference = 0" means, practitioners and regulators have no single authoritative reference.
-4. **The downstream harm.** Courts citing AIF360's metrics, regulators referencing its documentation, and engineers trusting its API — all inherit whatever the docstring says.
-5. **The volunteer maintenance trap.** Hanabi9248 offered a concrete fix, but the issue can't be merged without maintainer push.
-
-**Discussion prompts for the episode:**
-- Should fairness toolkits be required to publish formal verification of their metric definitions — the way cryptographic libraries publish formal proofs?
+**Discussion prompts:**
+- Should fairness toolkits be required to publish formal verification of their metric definitions?
 - Who should maintain the "official" definitions of fairness metrics — a single org, a consortium, or the community?
 - If a documentation error in a fairness toolkit leads to a biased decision in a court, who bears liability?
 - Is 17+ months of unmaintained documentation a symptom of the "research-to-production gap" in AI ethics?
-- When two tools (AIF360 vs. FairLearn) define the same metric differently, which definition should a regulator adopt?
-- Is a volunteer-submitted fix with no maintainer merge pathway actually authoritative?
-- Should fairness tool maintainers be required to respond to issues within a certain timeframe? What would that look like?
-
----
-
-## Debate 2: The MetricFrame API Design Debate — Who Does the Tool Serve?
-
-**Source:** [fairlearn/fairlearn Issue #756](https://github.com/fairlearn/fairlearn/issues/756)
-**Project:** [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn)
-**Tags:** `API`, `design-philosophy`
-**Status:** Open since April 22, 2021 — unresolved, 74 comments
-**Author:** [MiroDudik](https://github.com/MiroDudik) (FairLearn maintainer)
-
-### The Core Question
-
-`MetricFrame` is FairLearn's flagship tool for computing fairness metrics with disaggregation by sensitive features. But it only works with metrics that have the signature `metric(y_true, y_pred)`. Maintainer MiroDudik proposes two changes:
-
-- **Step 1:** Make all arguments keyword-only and rename `metric` → `metrics`
-- **Step 2:** Allow flexible shared sample parameters (e.g., `actions_taken`, `rewards`, `propensities` for contextual bandits)
-
-The goal: support **dataset-only metrics**, **streaming metrics**, and **metrics from other domains**. But the maintainers disagree on whether this flexibility is worth the complexity.
-
-### The Two Sides
-
-**Side A — Generalize MetricFrame (MiroDudik's position):**
-- The current API is "really limiting us"
-- Real use cases exist beyond classification: dataset-only metrics, streaming, bandits
-- Keyword-only arguments with optional `y_true`/`y_pred` (`=None`) solve the problem without breaking backward compatibility
-
-**Side B — Keep MetricFrame simple, build new classes for new use cases (riedgar-ms, hildeweerts):**
-- "I am afraid that trying to fit all different kinds of learning tasks into one MetricFrame will become extremely confusing for novice users"
-- "`**kwargs` in the signature means you can't add new named arguments later without breaking someone"
-- "The majority of users will be looking for classification/regression metrics and may not even be familiar with reinforcement learning"
-
-### The Compromise That Emerged
-
-After 74 comments over 5 months:
-1. ✅ **Rename `metric` → `metrics`** (everyone agrees)
-2. ✅ **Switch to keyword-only arguments** (everyone agrees)
-3. ✅ **Add `shared_sample_params` as a dictionary** (not `**kwargs`)
-4. ❌ **Optional `y_true`/`y_pred`** — still contested
-5. ❓**New class for non-standard metrics** — still open
-
-### The Deeper Tension: Who Does the Tool Serve?
-
-**For practitioners** (hiring, lending): Classification metrics are enough. They want a simple, predictable API.
-**For researchers** (bandits, causal inference, streaming): The current API is a straitjacket.
-**For the project's future**: Every generalization makes the API harder to document, test, and extend. Every specialization fragments the ecosystem.
-
-**Discussion prompts:**
-- Should a fairness tool be a general-purpose framework or a specialized instrument?
-- When does API flexibility become API confusion? Where's the line?
-- Who should decide which use cases a fairness tool supports — the maintainers, the users, or the communities being audited?
-- If two tools (AIF360 vs. FairLearn) define the same metric differently, which definition should a regulator adopt?
 
 ---
 
@@ -131,28 +177,13 @@ After 74 comments over 5 months:
 
 The current implementation of the Empirical Differential Fairness (EDF) metric only returns a **single scalar value** summarizing fairness across protected attributes. But for intersectional analysis, a single number hides the story: which specific combinations of attribute groups contribute most to the maximum log-ratio?
 
-jetverbeek asked for the metric to return:
-- The pair(s) of attribute groups that produce the max log ratio
-- A breakdown of all/top X group combinations and their respective log-ratios
+jetverbeek asked for the metric to return the pair(s) of attribute groups that produce the max log ratio, plus a breakdown of all/top X group combinations.
 
-### The Two Sides
+**Side A — Single scalar is enough for most use cases.** Regulatory frameworks typically ask for a single fairness score per protected attribute.
 
-**Side A — Single scalar is enough for most use cases.** Regulatory frameworks (EU AI Act, FTC guidance) typically ask for a single fairness score per protected attribute.
+**Side B — Intersectional analysis is essential for real fairness.** Hanabi9248 offered to implement a separate method for the group-pair breakdown while keeping the scalar return for backward compatibility.
 
-**Side B — Intersectional analysis is essential for real fairness.** A single scalar can hide severe disparities for specific subpopulations. Hanabi9248 offered to implement a separate method for the group-pair breakdown while keeping the scalar return for backward compatibility.
-
-**Community response:** Hanabi9248 (September 2026) volunteered to implement the enhancement — but the issue remains **unassigned and unmerged**.
-
-### Why It Matters
-
-1. **The scalar vs. breakdown tension is a political choice.** A single "fairness score" simplifies regulation but can erase the communities that need the most protection.
-2. **Who decides the granularity of fairness reporting?** Regulators, practitioners, or the communities being audited?
-3. **The volunteer-maintenance pattern.** Both AIF360 debates (#528 and #558) share the same pattern: a volunteer offers a fix or enhancement, but the issue sits unassigned.
-
-**Discussion prompts:**
-- Should fairness tools be required to support intersectional analysis by default, or is a single scalar acceptable for regulatory contexts?
-- If a single scalar can mask the worst-off group, is it ethical to ship that as the default output?
-- Who should pay for the maintenance of fairness tools that courts and regulators depend on?
+**Why It Matters:** A single "fairness score" simplifies regulation but can erase the communities that need the most protection. Who decides the granularity of fairness reporting?
 
 ---
 
@@ -172,16 +203,7 @@ When auditing racial bias in a COMPAS recidivism model using SHAP values, how sh
 
 Both numbers are correct. They answer different questions.
 
-### Why It Matters
-
-The choice of denominator is a rhetorical decision disguised as a number. "Race drives 48% of the model's decisions" sounds more alarming than "race drives 42%" — but the difference isn't about the model. It's about what you want the audience to feel.
-
-In a courtroom, a prosecutor would cite 48%. A defense attorney would cite 42%. A journalist would pick whichever fits the headline.
-
-**Discussion prompts:**
-- Is there a "correct" way to aggregate feature importance for fairness reporting?
-- Should fairness audits standardize denominator conventions (like p-value thresholds)?
-- Does the choice of denominator change policy outcomes — and if so, who should make that choice?
+**Why It Matters:** The choice of denominator is a rhetorical decision disguised as a number. In a courtroom, a prosecutor would cite 48%. A defense attorney would cite 42%. A journalist would pick whichever fits the headline.
 
 ---
 
@@ -207,11 +229,6 @@ The COMPAS case is the canonical illustration:
 
 Both were mathematically correct. They were measuring different things.
 
-**Discussion prompts:**
-- Should there be a "default" fairness metric for high-stakes domains — and who should set it?
-- Is the impossibility theorem an argument against fairness metrics altogether?
-- If you can't satisfy all metrics, whose rights should the metric protect?
-
 ---
 
 ## How to Contribute a Debate
@@ -224,7 +241,5 @@ Found a great fairness controversy in an open-source issue thread? Contribute:
 4. Add discussion prompts for our listeners
 
 Format: follow the structure above — **The Question → Why It Matters → Discussion Prompts**
-
----
 
 *Debates are sourced from real GitHub issue threads. The summary represents the maintainer's perspective; listener and contributor counterarguments are welcome — open an issue or submit a PR.*
