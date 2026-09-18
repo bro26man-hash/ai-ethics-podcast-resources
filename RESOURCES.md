@@ -24,7 +24,7 @@ A curated catalog of **active open-source projects** related to algorithmic fair
 
 **Active issues:**
 - [#528](https://github.com/Trusted-AI/AIF360/issues/528) — `average_odds_difference` docstring wrongly claims "equality of odds" (open since April 2024, 2 👍)
-- [#558](https://github.com/Trusted-AI/AIF360/issues/558) — Extend Empirical Differential Fairness metric (open since Jan 2026)
+- [#558](https://github.com/Trusted-AI/AIF360/issues/558) — Extend Empirical Differential Fairness metric for intersectional analysis (open since Jan 2026)
 - [#548](https://github.com/Trusted-AI/AIF360/issues/548) — AI Fairness 360 website is down (open since Feb 2025, 7 comments)
 - [#526](https://github.com/Trusted-AI/AIF360/issues/526) — Memory Management Issue in ClassificationMetric (open since April 2024)
 
@@ -38,70 +38,7 @@ from aif360.metrics import ClassificationMetric
 
 ---
 
-### 2. [AIBF_API — jbarach2012](https://github.com/jbarach2012/AIBF_API) — *Explainable Bias-Detection Firewall for Hiring ATS*
-
-| | |
-|---|---|
-| **Stars** | 195 ⭐ |
-| **Language** | Python |
-| **License** | Apache 2.0 |
-| **Last Updated** | September 2026 |
-| **Maintainer** | jbarach2012 (independent contributor) |
-
-**What it does:** An open-source, explainable bias-detection firewall for Applicant Tracking Systems. AIBF intercepts an ATS scoring decision, measures how much of it was driven by protected-attribute proxies rather than merit, explains why in plain language, flags biased decisions for human review, and learns from HR feedback. Built on synthetic data — no real candidate data ships with the project.
-
-**Why it matters for the podcast:** This is fairness auditing applied to the hiring pipeline — the domain where 87% of companies screen resumes with AI before a human ever sees them. Unlike the academic toolkits (AIF360, FairLearn), AIBF is built for a specific, high-stakes application: real-time decision interception. It raises a distinct question: **can a "firewall" approach — flagging bias after the decision but before the action — actually protect candidates, or is post-hoc flagging too late?**
-
-**Key feature:** The bias score is the share of a decision's score-movement coming from protected-proxy features, computed via SHAP values against a neutral (attribute-absent) baseline. Decisions above a threshold are flagged with plain-language explanations.
-
-```bash
-git clone https://github.com/jbarach2012/AIBF_API
-cd aibf
-pip install -r requirements.txt
-python -m app.services.pipeline_demo  # see a biased resume flagged, a clean one not
-```
-
-**Podcast angle:** If a hiring AI flags 34% of a rejected candidate's score as coming from protected-attribute proxies, what happens next? Does the candidate get a real remedy, or just a flag that gets ignored? And who builds the watchdog — the same company that built the hunting dog?
-
----
-
-### 3. [Fair-Code — yakew7](https://github.com/yakew7/Fair-Code) — *7 Open-Source Algorithmic Bias Audits*
-
-| | |
-|---|---|
-| **Stars** | 47 ⭐ |
-| **Language** | Python / HTML |
-| **License** | MIT |
-| **Last Updated** | September 2026 |
-| **Maintainer** | yakew7 (independent researcher) |
-
-**What it does:** A research and engineering project that exposes bias in real-world AI systems and demonstrates concrete mitigation strategies. Every audit follows the same pipeline: train a biased model → measure the fairness gap → engineer a fair model → measure again. Seven full audits across criminal justice (COMPAS), hiring, lending, healthcare (insurance denial + readmission), welfare eligibility, and tenant screening. Each ships as runnable `unfair.py` / `fair.py` scripts plus Jupyter notebooks.
-
-**Why it matters for the podcast:** Fair-Code proves that bias is measurable and fixable — but also that removing protected attributes alone isn't enough; proxy variables smuggle the same signal back in. The tenant-screening audit is particularly striking: dropping race and all 12 criminal-history proxies only cuts the fairness gap from 6.68% to 5.16%, and it stays statistically significant — because re-arrest itself is a policed quantity. The real remedy isn't a cleaner feature set; it's questioning whether the score belongs in the decision at all.
-
-**Key features:**
-- **Open Dataset Profiler** — audits datasets for demographic representation before any model is trained (web + CLI)
-- **Benchmark Harness** — applies one uniform pipeline across all 7 audits with 3 mitigation strategies (S0–S4)
-- **61 explainers** — plain-language write-ups of individual fairness concepts, each with runnable detection code
-- **MCP server** — 6 tools for coding agents to profile datasets mid-conversation
-
-**Active issues:**
-- [#672](https://github.com/yakew7/Fair-Code/issues/672) — SHAP measurement: does the denominator (top-5 features vs. all features) change the story? (see `DEBATES.md`)
-- [#654](https://github.com/yakew7/Fair-Code/issues/654) — Counterfactual fairness reproduction: the headline numbers don't match the code (see `DEBATES.md`)
-- [#665](https://github.com/yakew7/Fair-Code/issues/665) — COMPAS numbers in the impossibility-theorem explainer are contested
-
-```bash
-git clone https://github.com/yakew7/Fair-Code
-cd Fair-Code
-python COMPAS/unfair.py   # see the bias
-python COMPAS/fair.py     # see the fix
-```
-
-**Podcast angle:** When the tenant-screening audit shows that even after removing race and all proxies, the gap stays significant — what's the fix? Better feature engineering, or rethinking whether re-arrest scores should determine who gets a lease?
-
----
-
-### 4. [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn) — *Fairness Assessment & Mitigation*
+### 2. [FairLearn — Microsoft](https://github.com/fairlearn/fairlearn) — *Fairness Assessment & Mitigation*
 
 | | |
 |---|---|
@@ -127,7 +64,7 @@ from fairlearn.metrics import MetricFrame, plot_roc_curve_by_group
 
 ---
 
-### 5. [Aequitas — DSG (Data & Society Project)](https://github.com/dssg/aequitas) — *Bias Auditing & Fair ML Toolkit*
+### 3. [Aequitas — DSG (Data & Society Project)](https://github.com/dssg/aequitas) — *Bias Auditing & Fair ML Toolkit*
 
 | | |
 |---|---|
@@ -153,15 +90,39 @@ from aequitas.group import Group
 
 ---
 
+## 📖 Bonus: Related Projects
+
+### [AIBF_API — jbarach2012](https://github.com/jbarach2012/AIBF_API) — *Explainable Bias-Detection Firewall for Hiring ATS*
+
+| | |
+|---|---|
+| **Stars** | 195 ⭐ |
+| **Language** | Python |
+| **License** | Apache 2.0 |
+
+An open-source, explainable bias-detection firewall for Applicant Tracking Systems. AIBF intercepts an ATS scoring decision, measures how much of it was driven by protected-attribute proxies rather than merit, explains why in plain language, and flags biased decisions for human review.
+
+### [Fair-Code — yakew7](https://github.com/yakew7/Fair-Code) — *7 Open-Source Algorithmic Bias Audits*
+
+| | |
+|---|---|
+| **Stars** | 47 ⭐ |
+| **Language** | Python / HTML |
+| **License** | MIT |
+
+Seven full fairness audits across criminal justice (COMPAS), hiring, lending, healthcare, welfare eligibility, and tenant screening. Each ships as runnable scripts plus Jupyter notebooks. Includes a dataset profiler, benchmark harness, and 61 plain-language explainers.
+
+---
+
 ## 🗺️ The Fairness Landscape — Quick Reference
 
 | Project | Stars | Focus | Best For |
 |---|---|---|---|
 | **AIF360** | 2,866 ⭐ | Comprehensive metric library + mitigation | Understanding how fairness is defined in production/government contexts; **live debate in Issue #528** |
-| **AIBF_API** | 195 ⭐ | Real-time bias detection in hiring ATS | The hiring-pipeline use case; post-hoc flagging vs. pre-decision interception |
-| **Fair-Code** | 47 ⭐ | 7 full bias audits + dataset profiler | Domain-specific audits (COMPAS, healthcare, tenant screening); **live debates in Issues #672, #654** |
 | **FairLearn** | 2,286 ⭐ | Fairness assessment + mitigation | Practitioners in Microsoft/MLOps ecosystems; **live debate in Issue #1725** |
 | **Aequitas** | 773 ⭐ | Bias auditing + evidence-grade reporting | Auditors who need to produce documentation, not just metrics |
+| **AIBF_API** | 195 ⭐ | Real-time bias detection in hiring ATS | The hiring-pipeline use case; post-hoc flagging vs. pre-decision interception |
+| **Fair-Code** | 47 ⭐ | 7 full bias audits + dataset profiler | Domain-specific audits (COMPAS, healthcare, tenant screening) |
 
 ---
 
@@ -170,7 +131,6 @@ from aequitas.group import Group
 - [AIF360 documentation](https://aif360.readthedocs.io/en/stable/) — IBM's official metric documentation
 - [FairLearn documentation](https://fairlearn.readthedocs.io/) — Microsoft's fairness toolkit docs
 - [Aequitas documentation](https://dssg.github.io/aequitas/) — DSG's audit toolkit docs
-- [Fair-Code website](https://www.thefaircode.xyz) — Live audits and explainers
 - [ProPublica: Machine Bias (2016)](https://www.propublica.org/article/machine-bias-risk-assessments-in-criminal-sentencing) — The investigation that started the COMPAS debate
 - [Chouldechova (2017): Fair Prediction with Disparate Impact](https://arxiv.org/abs/1703.00056) — The impossibility theorem proof
 - [Kleinberg, Mullainasan & Raghavan (2016): Inherent Trade-offs](https://arxiv.org/abs/1609.05807) — Independent impossibility result
@@ -183,16 +143,9 @@ from aequitas.group import Group
 
 Each episode zooms in on a **specific ongoing disagreement** from an open issue thread:
 
-1. **The Missing-Value Contract Debate** (FairLearn #1725) — Should `MetricFrame` and `plot_roc_curve_by_group` handle missing sensitive features the same way? What does "strict" even mean in a fairness tool?
-
-2. **The Documentation Accuracy Debate** (AIF360 #528) — When the most-cited fairness toolkit ships a metric docstring that misstates what "zero" means, who owns the definition?
-
-3. **The SHAP Measurement Problem** (Fair-Code #672) — Does the choice of denominator (top-5 features vs. all features) change the story of racial bias? Who gets to decide what number tells the story of discrimination?
-
-4. **The Counterfactual Fairness Reversal** (Fair-Code #654) — A synthetic lending audit's claimed racial disparity flips direction when actually reproduced. What does it mean when the "expected" outcome contradicts the real one?
-
-5. **The Audit-Grade vs. Research-Grade Divide** (Aequitas #201, #86) — Should fairness tools be built for producing court-ready evidence, or for exploratory research? Can one tool serve both?
-
-6. **The Enterprise-vs-Academic Tension** (Infosys RAI) — When fairness is one module in a commercial responsible-AI suite, does it get the same depth as standalone academic toolkits? Who decides what "fair enough" means for a product that also sells safety and security?
+1. **The Average-Odds Documentation Bug** (AIF360 #528) — When the most-cited fairness toolkit ships a metric docstring that misstates what "zero" means, who owns the definition?
+2. **The Intersectional Analysis Gap** (AIF360 #558) — Should fairness tools return a single scalar, or should they break down discrimination by specific group combinations?
+3. **The Missing-Value Contract** (FairLearn #1725) — Should fairness tools be strict or silent when sensitive data is missing?
+4. **The Audit-Grade vs. Research-Grade Divide** (Aequitas #201, #86) — Should fairness tools be built for producing court-ready evidence, or for exploratory research?
 
 *Contributors: Add your favourite fairness project to `RESOURCES.md` — just follow the table format above and include stars, license, and a one-line pitch.*
